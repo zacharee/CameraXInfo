@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
-import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import dev.zwander.cameraxinfo.R
 
 @Composable
@@ -41,8 +41,10 @@ fun CameraXInfoTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            (view.context as Activity).window.statusBarColor = colorScheme.primary.toArgb()
-            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+            (view.context as Activity).window.apply {
+                statusBarColor = colorScheme.primary.toArgb()
+                WindowCompat.getInsetsController(this, view).isAppearanceLightStatusBars = darkTheme
+            }
         }
     }
 
