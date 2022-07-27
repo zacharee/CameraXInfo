@@ -22,7 +22,7 @@
     <string name="fhd">1080p</string>
     <string name="uhd">2160p</string>
 
-    <string name="logical_camera_format">Logical Camera %s</string>
+    <string name="logical_camera_format">Camera %s</string>
     <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
     <string name="physical_camera_format"><![CDATA[<b>%1$s:</b> %2$sMP, %3$s˚]]></string>
 </resources>
