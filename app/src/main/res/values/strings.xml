@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">CameraX Info</string>
+
+    <string name="auto">Auto</string>
+    <string name="bokeh">Bokeh</string>
+    <string name="hdr">HDR</string>
+    <string name="night">Night</string>
+    <string name="face_retouch">Face Retouch</string>
+    <string name="none">None</string>
+    <string name="supported">Supported</string>
+    <string name="unsupported">Unsupported</string>
+    <string name="unknown">Unknown</string>
+    <string name="front_facing">Front Facing</string>
+    <string name="rear_facing">Rear-Facing</string>
+    <string name="external">External</string>
+    <string name="physical_cameras">Physical Cameras</string>
+    <string name="extensions">Extensions</string>
+    <string name="video_qualities">Video Qualities</string>
+
+    <string name="sd">480p</string>
+    <string name="hd">720p</string>
+    <string name="fhd">1080p</string>
+    <string name="uhd">2160p</string>
+
+    <string name="logical_camera_format">Logical Camera %s</string>
+    <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
+    <string name="physical_camera_format"><![CDATA[<b>%1$s:</b> %2$sMP, %3$s˚]]></string>
+</resources>
