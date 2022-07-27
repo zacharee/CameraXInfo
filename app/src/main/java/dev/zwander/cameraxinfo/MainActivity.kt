@@ -21,7 +21,7 @@ import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -32,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +67,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Preview
 @Composable
@@ -93,34 +91,18 @@ fun MainContent() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            val infos = provider?.availableCameraInfos?.map { it to Camera2CameraInfo.from(it) } ?: listOf()
+            val infos = provider?.availableCameraInfos?.map { it to Camera2CameraInfo.from(it) }?.sortedBy {
+                it.second.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
+            } ?: listOf()
 
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 infos.forEach { (info, info2) ->
-                    stickyHeader(key = info2.cameraId) {
-                        CameraHeader(which = info, which2 = info2)
-                    }
-
-//                    item(key = "${info2.cameraId}+features-header") {
-//                        ExtensionsHeader()
-//                    }
-
-                    val extensionAvailability = arrayOf(
-                        ExtensionMode.AUTO,
-                        ExtensionMode.BOKEH,
-                        ExtensionMode.HDR,
-                        ExtensionMode.NIGHT,
-                        ExtensionMode.FACE_RETOUCH
-                    ).map {
-                        it to extensionsManager?.isExtensionAvailable(info.cameraSelector, it)
-                    }
-
-                    extensionAvailability.forEach { (extension, available) ->
-                        item(key = "${info2.cameraId}+${extension}") {
-                            CameraFeature(featureName = extension.extensionModeToString(), supported = available ?: false)
-                        }
+                    item(key = info2.cameraId) {
+                        CameraCard(which = info, which2 = info2, extensionsManager = extensionsManager)
                     }
                 }
             }
@@ -129,9 +111,9 @@ fun MainContent() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnsafeOptInUsageError")
+@SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
-fun CameraHeader(which: CameraInfo, which2: Camera2CameraInfo) {
+fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?) {
     val context = LocalContext.current
     val cameraManager = remember {
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -147,10 +129,23 @@ fun CameraHeader(which: CameraInfo, which2: Camera2CameraInfo) {
             })
         }.asReversed()
     }
+    val physicalSensors = remember(which2.cameraId) {
+        mutableStateListOf<Pair<String, CameraCharacteristics>>()
+    }
 
-    Card(
-        modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
-    ) {
+    LaunchedEffect(key1 = which2.cameraId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val logicalChars = cameraManager.getCameraCharacteristics(which2.cameraId)
+
+            val physicals = logicalChars.physicalCameraIds.map {
+                it to cameraManager.getCameraCharacteristics(it)
+            }
+
+            physicalSensors.addAll(physicals)
+        }
+    }
+
+    Card {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,82 +155,134 @@ fun CameraHeader(which: CameraInfo, which2: Camera2CameraInfo) {
             Text(
                 text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 28.sp,
+            )
+
+            Divider(
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .fillMaxWidth(0.33f)
             )
 
             Text(
-                text = stringResource(
-                    id = R.string.camera_direction_format,
-                    which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING).lensFacingToString(),
-                    which2.formatResolution(),
-                    getFOV(
-                        which2.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.minOf { it } ?: 0f,
-                        which2.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: SizeF(0f, 0f)
+                text = if (physicalSensors.isNotEmpty()) {
+                    which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING).lensFacingToString()
+                } else {
+                    stringResource(
+                        id = R.string.camera_direction_format,
+                        which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING).lensFacingToString(),
+                        which2.formatResolution(),
+                        getFOV(
+                            which2.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.minOf { it } ?: 0f,
+                            which2.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: SizeF(0f, 0f)
+                        )
                     )
-                )
+                },
+                modifier = Modifier.padding(bottom = 8.dp)
             )
+
+            if (physicalSensors.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(4.dp))
+
+                PhysicalSensors(physicalSensors = physicalSensors)
+            }
 
             if (supportedQualities.isNotEmpty()) {
                 Spacer(modifier = Modifier.size(4.dp))
 
-                Text(
-                    text = stringResource(id = R.string.video_qualities),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-
-                FlowRow(
-                    mainAxisSize = SizeMode.Expand,
-                    mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                    mainAxisSpacing = 8.dp
-                ) {
-                    supportedQualities.forEach {
-                        Text(
-                            text = it
-                        )
-                    }
-                }
+                VideoQualities(supportedQualities = supportedQualities)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val logicalChars = cameraManager.getCameraCharacteristics(which2.cameraId)
+            Spacer(Modifier.size(16.dp))
 
-                val physicals = logicalChars.physicalCameraIds.map {
-                    it to cameraManager.getCameraCharacteristics(it)
-                }
+            ExtensionsCard(extensionsManager = extensionsManager, which = which)
+        }
+    }
+}
 
-                if (physicals.isNotEmpty()) {
-                    Spacer(modifier = Modifier.size(4.dp))
+@Composable
+fun PhysicalSensors(physicalSensors: List<Pair<String, CameraCharacteristics>>) {
+    Text(
+        text = stringResource(id = R.string.physical_cameras),
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp
+    )
 
-                    Text(
-                        text = stringResource(id = R.string.physical_cameras),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
+    FlowRow(
+        mainAxisSize = SizeMode.Expand,
+        mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
+        mainAxisSpacing = 8.dp
+    ) {
+        physicalSensors.forEach { (id, chars) ->
+            Text(
+                text = Html.fromHtml(
+                    stringResource(
+                        id = R.string.physical_camera_format,
+                        id,
+                        chars[CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE].formatResolution(),
+                        getFOV(
+                            chars[CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS].minOf { it },
+                            chars[CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE]
+                        )
+                    ),
+                    0
+                ).toAnnotatedString(),
+            )
+        }
+    }
+}
 
-                    FlowRow(
-                        mainAxisSize = SizeMode.Expand,
-                        mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-                        mainAxisSpacing = 8.dp
-                    ) {
-                        physicals.forEach { (id, chars) ->
-                            Text(
-                                text = Html.fromHtml(
-                                    stringResource(
-                                        id = R.string.physical_camera_format,
-                                        id,
-                                        chars[CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE].formatResolution(),
-                                        getFOV(
-                                            chars[CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS].minOf { it },
-                                            chars[CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE]
-                                        )
-                                    ),
-                                    0
-                                ).toAnnotatedString(),
-                            )
-                        }
-                    }
-                }
+@Composable
+fun VideoQualities(supportedQualities: List<String>) {
+    Text(
+        text = stringResource(id = R.string.video_qualities),
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp
+    )
+
+    FlowRow(
+        mainAxisSize = SizeMode.Expand,
+        mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
+        mainAxisSpacing = 8.dp
+    ) {
+        supportedQualities.forEach {
+            Text(
+                text = it
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExtensionsCard(extensionsManager: ExtensionsManager?, which: CameraInfo) {
+    Card(
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface))
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.extensions),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+
+            val extensionAvailability = arrayOf(
+                ExtensionMode.AUTO,
+                ExtensionMode.BOKEH,
+                ExtensionMode.HDR,
+                ExtensionMode.NIGHT,
+                ExtensionMode.FACE_RETOUCH
+            ).map {
+                it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
+            }
+
+            extensionAvailability.forEach { (extension, available) ->
+                CameraFeature(featureName = extension.extensionModeToString(), supported = available ?: false)
             }
         }
     }
@@ -286,25 +333,6 @@ private fun getFOV(focal: Float, frameSize: SizeF): String {
 }
 
 @Composable
-fun ExtensionsHeader() {
-    Row(
-        modifier = Modifier
-            .heightIn(min = 48.dp)
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(id = R.string.extensions),
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
 fun CameraFeature(featureName: String, supported: Boolean) {
     CameraItem(
         featureName = featureName,
@@ -318,8 +346,7 @@ fun CameraItem(featureName: String, text: String, color: Color) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(horizontal = 16.dp),
+            .heightIn(min = 56.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
