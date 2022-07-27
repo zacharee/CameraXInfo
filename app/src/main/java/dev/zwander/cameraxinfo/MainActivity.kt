@@ -132,6 +132,9 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
     val physicalSensors = remember(which2.cameraId) {
         mutableStateListOf<Pair<String, CameraCharacteristics>>()
     }
+    val extensions = remember(which2.cameraId) {
+        mutableStateListOf<Pair<Int, Boolean?>>()
+    }
 
     LaunchedEffect(key1 = which2.cameraId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -143,6 +146,17 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
 
             physicalSensors.addAll(physicals)
         }
+
+        val extensionAvailability = arrayOf(
+            ExtensionMode.AUTO,
+            ExtensionMode.BOKEH,
+            ExtensionMode.HDR,
+            ExtensionMode.NIGHT,
+            ExtensionMode.FACE_RETOUCH
+        ).map {
+            it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
+        }
+        extensions.addAll(extensionAvailability)
     }
 
     Card {
@@ -195,7 +209,7 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
 
             Spacer(Modifier.size(16.dp))
 
-            ExtensionsCard(extensionsManager = extensionsManager, which = which)
+            ExtensionsCard(extensionAvailability = extensions)
         }
     }
 }
@@ -255,7 +269,7 @@ fun VideoQualities(supportedQualities: List<String>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExtensionsCard(extensionsManager: ExtensionsManager?, which: CameraInfo) {
+fun ExtensionsCard(extensionAvailability: List<Pair<Int, Boolean?>>) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -270,16 +284,6 @@ fun ExtensionsCard(extensionsManager: ExtensionsManager?, which: CameraInfo) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
-
-            val extensionAvailability = arrayOf(
-                ExtensionMode.AUTO,
-                ExtensionMode.BOKEH,
-                ExtensionMode.HDR,
-                ExtensionMode.NIGHT,
-                ExtensionMode.FACE_RETOUCH
-            ).map {
-                it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
-            }
 
             extensionAvailability.forEach { (extension, available) ->
                 CameraFeature(featureName = extension.extensionModeToString(), supported = available ?: false)
