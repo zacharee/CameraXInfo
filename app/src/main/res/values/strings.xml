@@ -16,6 +16,11 @@
     <string name="physical_cameras">Physical Cameras</string>
     <string name="extensions">Extensions</string>
     <string name="video_qualities">Video Qualities</string>
+    <string name="ar_core">ARCore</string>
+    <string name="depth_api">Depth API</string>
+    <string name="installed">Installed</string>
+    <string name="not_installed">Not Installed</string>
+    <string name="outdated">Outdated</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>

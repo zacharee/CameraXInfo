@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.zwander.cameraxinfo.ui.components.ARCoreCard
 import dev.zwander.cameraxinfo.ui.components.CameraCard
 import dev.zwander.cameraxinfo.ui.theme.CameraXInfoTheme
 import kotlinx.coroutines.guava.await
@@ -79,6 +80,10 @@ fun MainContent() {
                 contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                item(key = "ARCore") {
+                    ARCoreCard()
+                }
+
                 infos.forEach { (info, info2) ->
                     item(key = info2.cameraId) {
                         CameraCard(which = info, which2 = info2, extensionsManager = extensionsManager)

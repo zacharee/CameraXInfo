@@ -33,7 +33,6 @@ import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
 fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?) {
@@ -84,61 +83,54 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         extensions.addAll(extensionAvailability)
     }
 
-    Card {
-        Column(
+    PaddedColumnCard {
+        Text(
+            text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
+            fontWeight = FontWeight.Bold,
+            fontSize = 28.sp,
+        )
+
+        Divider(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp,
-            )
+                .padding(top = 8.dp, bottom = 8.dp)
+                .fillMaxWidth(0.33f)
+        )
 
-            Divider(
-                modifier = Modifier
-                    .padding(top = 8.dp, bottom = 8.dp)
-                    .fillMaxWidth(0.33f)
-            )
-
-            Text(
-                text = if (physicalSensors.isNotEmpty()) {
+        Text(
+            text = if (physicalSensors.isNotEmpty()) {
+                which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
+                    .lensFacingToString()
+            } else {
+                stringResource(
+                    id = R.string.camera_direction_format,
                     which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
-                        .lensFacingToString()
-                } else {
-                    stringResource(
-                        id = R.string.camera_direction_format,
-                        which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
-                            .lensFacingToString(),
-                        which2.formatResolution(),
-                        getFOV(
-                            which2.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)
-                                ?.minOf { it } ?: 0f,
-                            which2.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)
-                                ?: SizeF(0f, 0f)
-                        )
+                        .lensFacingToString(),
+                    which2.formatResolution(),
+                    getFOV(
+                        which2.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)
+                            ?.minOf { it } ?: 0f,
+                        which2.getCameraCharacteristic(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)
+                            ?: SizeF(0f, 0f)
                     )
-                },
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                )
+            },
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-            if (physicalSensors.isNotEmpty()) {
-                Spacer(modifier = Modifier.size(4.dp))
+        if (physicalSensors.isNotEmpty()) {
+            Spacer(modifier = Modifier.size(4.dp))
 
-                PhysicalSensors(physicalSensors = physicalSensors)
-            }
-
-            if (supportedQualities.isNotEmpty()) {
-                Spacer(modifier = Modifier.size(4.dp))
-
-                VideoQualities(supportedQualities = supportedQualities)
-            }
-
-            Spacer(Modifier.size(16.dp))
-
-            ExtensionsCard(extensionAvailability = extensions)
+            PhysicalSensors(physicalSensors = physicalSensors)
         }
+
+        if (supportedQualities.isNotEmpty()) {
+            Spacer(modifier = Modifier.size(4.dp))
+
+            VideoQualities(supportedQualities = supportedQualities)
+        }
+
+        Spacer(Modifier.size(16.dp))
+
+        ExtensionsCard(extensionAvailability = extensions)
     }
 }
