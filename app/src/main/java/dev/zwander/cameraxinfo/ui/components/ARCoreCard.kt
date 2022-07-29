@@ -40,7 +40,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
 
     LaunchedEffect(key1 = null) {
         val status = withContext(Dispatchers.IO) {
-            ArCoreApk.getInstance().checkAvailability(context).await(context)
+            ArCoreApk.getInstance().awaitAvailability(context)
         }
 
         depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
@@ -146,11 +146,13 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
     }
 }
 
-private suspend fun ArCoreApk.Availability.await(context: Context): ArCoreApk.Availability {
-    return if (isTransient) {
+private suspend fun ArCoreApk.awaitAvailability(context: Context): ArCoreApk.Availability {
+    val status = ArCoreApk.getInstance().checkAvailability(context)
+
+    return if (status.isTransient) {
         delay(200)
-        ArCoreApk.getInstance().checkAvailability(context).await(context)
+        awaitAvailability(context)
     } else {
-        this
+        status
     }
 }
