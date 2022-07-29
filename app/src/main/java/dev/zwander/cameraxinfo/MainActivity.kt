@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.zwander.cameraxinfo.model.DataModel
+import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.ui.components.ARCoreCard
 import dev.zwander.cameraxinfo.ui.components.CameraCard
 import dev.zwander.cameraxinfo.ui.components.InfoCard
@@ -75,36 +77,40 @@ fun MainContent() {
         provider = p
     }
 
-    CameraXInfoTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            val infos = provider?.availableCameraInfos?.map { it to Camera2CameraInfo.from(it) }?.sortedBy {
-                it.second.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
-            } ?: listOf()
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+    CompositionLocalProvider(
+        LocalDataModel provides DataModel()
+    ) {
+        CameraXInfoTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.background
             ) {
-                item(key = "InfoCard") {
-                    InfoCard(modifier = Modifier.animateItemPlacement())
-                }
+                val infos = provider?.availableCameraInfos?.map { it to Camera2CameraInfo.from(it) }?.sortedBy {
+                    it.second.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
+                } ?: listOf()
 
-                item(key = "ARCore") {
-                    ARCoreCard(modifier = Modifier.animateItemPlacement())
-                }
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item(key = "InfoCard") {
+                        InfoCard(modifier = Modifier.animateItemPlacement())
+                    }
 
-                infos.forEach { (info, info2) ->
-                    item(key = info2.cameraId) {
-                        CameraCard(
-                            which = info,
-                            which2 = info2,
-                            extensionsManager = extensionsManager,
-                            modifier = Modifier.animateItemPlacement()
-                        )
+                    item(key = "ARCore") {
+                        ARCoreCard(modifier = Modifier.animateItemPlacement())
+                    }
+
+                    infos.forEach { (info, info2) ->
+                        item(key = info2.cameraId) {
+                            CameraCard(
+                                which = info,
+                                which2 = info2,
+                                extensionsManager = extensionsManager,
+                                modifier = Modifier.animateItemPlacement()
+                            )
+                        }
                     }
                 }
             }

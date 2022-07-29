@@ -26,40 +26,26 @@ import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
+import dev.zwander.cameraxinfo.model.LocalDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+
+private val defaultExtensionState = mapOf(
+    ExtensionMode.AUTO to null,
+    ExtensionMode.BOKEH to null,
+    ExtensionMode.HDR to null,
+    ExtensionMode.NIGHT to null,
+    ExtensionMode.FACE_RETOUCH to null
+)
 
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
 fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val model = LocalDataModel.current
+
     val cameraManager = remember {
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-    }
-    val supportedQualities = remember {
-        QualitySelector.getSupportedQualities(which).map {
-            context.resources.getString(
-                when (it) {
-                    Quality.SD -> (R.string.sd)
-                    Quality.HD -> (R.string.hd)
-                    Quality.FHD -> (R.string.fhd)
-                    Quality.UHD -> (R.string.uhd)
-                    else -> (R.string.unknown)
-                }
-            )
-        }.asReversed()
-    }
-    val physicalSensors = remember(which2.cameraId) {
-        mutableStateListOf<Pair<String, CameraCharacteristics>>()
-    }
-    val extensions = remember(which2.cameraId) {
-        mutableStateMapOf<Int, Boolean?>(
-            ExtensionMode.AUTO to null,
-            ExtensionMode.BOKEH to null,
-            ExtensionMode.HDR to null,
-            ExtensionMode.NIGHT to null,
-            ExtensionMode.FACE_RETOUCH to null
-        )
     }
 
     LaunchedEffect(key1 = which2.cameraId) {
@@ -72,7 +58,7 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
                 }
             }
 
-            physicalSensors.addAll(physicals)
+            model.physicalSensors[which2.cameraId] = physicals.toMap()
         }
 
         val extensionAvailability = arrayOf(
@@ -84,7 +70,20 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         ).map {
             it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
         }
-        extensions.putAll(extensionAvailability)
+
+        model.extensions[which2.cameraId] = extensionAvailability.toMap()
+
+        model.supportedQualities[which2.cameraId] = QualitySelector.getSupportedQualities(which).map {
+            context.resources.getString(
+                when (it) {
+                    Quality.SD -> (R.string.sd)
+                    Quality.HD -> (R.string.hd)
+                    Quality.FHD -> (R.string.fhd)
+                    Quality.UHD -> (R.string.uhd)
+                    else -> (R.string.unknown)
+                }
+            )
+        }.asReversed()
     }
 
     PaddedColumnCard(
@@ -103,7 +102,7 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         )
 
         Text(
-            text = if (physicalSensors.isNotEmpty()) {
+            text = if (model.physicalSensors[which2.cameraId]?.isNotEmpty() == true) {
                 which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
                     .lensFacingToString()
             } else {
@@ -123,20 +122,24 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if (physicalSensors.isNotEmpty()) {
-            Spacer(modifier = Modifier.size(4.dp))
+        model.physicalSensors[which2.cameraId]?.let { physicalSensors ->
+            if (physicalSensors.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(4.dp))
 
-            PhysicalSensors(physicalSensors = physicalSensors)
+                PhysicalSensors(physicalSensors = physicalSensors)
+            }
         }
 
-        if (supportedQualities.isNotEmpty()) {
-            Spacer(modifier = Modifier.size(4.dp))
+        model.supportedQualities[which2.cameraId]?.let { supportedQualities ->
+            if (supportedQualities.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(4.dp))
 
-            VideoQualities(supportedQualities = supportedQualities)
+                VideoQualities(supportedQualities = supportedQualities)
+            }
         }
 
         Spacer(Modifier.size(16.dp))
 
-        ExtensionsCard(extensionAvailability = extensions)
+        ExtensionsCard(extensionAvailability = model.extensions[which2.cameraId] ?: defaultExtensionState)
     }
 }

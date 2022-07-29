@@ -17,7 +17,7 @@ import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.toAnnotatedString
 
 @Composable
-fun PhysicalSensors(physicalSensors: List<Pair<String, CameraCharacteristics>>) {
+fun PhysicalSensors(physicalSensors: Map<String, CameraCharacteristics>) {
     Text(
         text = stringResource(id = R.string.physical_cameras),
         fontWeight = FontWeight.Bold,

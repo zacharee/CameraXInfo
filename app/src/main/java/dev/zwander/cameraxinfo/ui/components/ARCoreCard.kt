@@ -9,7 +9,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +24,7 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.model.LocalDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -32,19 +32,14 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ARCoreCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current.applicationContext
-    var arCoreStatus by rememberSaveable {
-        mutableStateOf<ArCoreApk.Availability?>(null)
-    }
-    var depthStatus by rememberSaveable {
-        mutableStateOf<Boolean?>(null)
-    }
+    val model = LocalDataModel.current
 
     LaunchedEffect(key1 = null) {
         val status = withContext(Dispatchers.IO) {
             ArCoreApk.getInstance().awaitAvailability(context)
         }
 
-        depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+        model.depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             withContext(Dispatchers.IO) {
                 val session = Session(context)
                 session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
@@ -55,7 +50,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             null
         }
 
-        arCoreStatus = status
+        model.arCoreStatus = status
     }
 
     PaddedColumnCard(
@@ -72,7 +67,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                 fontSize = 28.sp
             )
 
-            AnimatedVisibility(visible = arCoreStatus == null) {
+            AnimatedVisibility(visible = model.arCoreStatus == null) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp)
                 )
@@ -97,8 +92,8 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             mainAxisSpacing = 8.dp
         ) {
             val (arCoreText, arCoreColor) = when {
-                arCoreStatus?.isSupported == true -> R.string.supported to Color.Green
-                arCoreStatus == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE -> R.string.unsupported to Color.Red
+                model.arCoreStatus?.isSupported == true -> R.string.supported to Color.Green
+                model.arCoreStatus == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE -> R.string.unsupported to Color.Red
                 else -> R.string.unknown to Color.Yellow
             }
 
@@ -110,7 +105,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                 modifier = Modifier.animateContentSize()
             )
 
-            val (arCoreInstallText, arCoreInstallColor) = when (arCoreStatus) {
+            val (arCoreInstallText, arCoreInstallColor) = when (model.arCoreStatus) {
                 ArCoreApk.Availability.SUPPORTED_INSTALLED -> R.string.installed to Color.Green
                 ArCoreApk.Availability.SUPPORTED_APK_TOO_OLD -> R.string.outdated to Color.Yellow
                 ArCoreApk.Availability.SUPPORTED_NOT_INSTALLED -> R.string.not_installed to Color.Red
@@ -139,7 +134,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             mainAxisSpacing = 8.dp
         ) {
-            val (depthText, depthColor) = when (depthStatus) {
+            val (depthText, depthColor) = when (model.depthStatus) {
                 true -> R.string.supported to Color.Green
                 false -> R.string.unsupported to Color.Red
                 else -> R.string.unknown to Color.Yellow
