@@ -2,6 +2,7 @@ package dev.zwander.cameraxinfo.ui.components
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,9 +102,12 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                 else -> R.string.unknown to Color.Yellow
             }
 
+            val acColor by animateColorAsState(targetValue = arCoreColor)
+
             Text(
                 text = stringResource(id = arCoreText),
-                color = arCoreColor
+                color = acColor,
+                modifier = Modifier.animateContentSize()
             )
 
             val (arCoreInstallText, arCoreInstallColor) = when (arCoreStatus) {
@@ -113,9 +117,12 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                 else -> R.string.unknown to Color.Yellow
             }
 
+            val aciColor by animateColorAsState(targetValue = arCoreInstallColor)
+
             Text(
                 text = stringResource(id = arCoreInstallText),
-                color = arCoreInstallColor
+                color = aciColor,
+                modifier = Modifier.animateContentSize()
             )
         }
 
@@ -138,9 +145,12 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                 else -> R.string.unknown to Color.Yellow
             }
 
+            val dColor by animateColorAsState(targetValue = depthColor)
+
             Text(
-                stringResource(id = depthText),
-                color = depthColor
+                text = stringResource(id = depthText),
+                color = dColor,
+                modifier = Modifier.animateContentSize()
             )
         }
     }

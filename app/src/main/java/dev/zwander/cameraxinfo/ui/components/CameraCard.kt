@@ -53,7 +53,13 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         mutableStateListOf<Pair<String, CameraCharacteristics>>()
     }
     val extensions = remember(which2.cameraId) {
-        mutableStateMapOf<Int, Boolean?>()
+        mutableStateMapOf<Int, Boolean?>(
+            ExtensionMode.AUTO to null,
+            ExtensionMode.BOKEH to null,
+            ExtensionMode.HDR to null,
+            ExtensionMode.NIGHT to null,
+            ExtensionMode.FACE_RETOUCH to null
+        )
     }
 
     LaunchedEffect(key1 = which2.cameraId) {

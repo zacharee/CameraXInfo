@@ -42,7 +42,7 @@ fun ExtensionsCard(extensionAvailability: Map<Int, Boolean?>) {
             extensionAvailability.forEach { (extension, available) ->
                 CameraFeature(
                     featureName = extension.extensionModeToString(),
-                    supported = available ?: false
+                    supported = available
                 )
             }
         }

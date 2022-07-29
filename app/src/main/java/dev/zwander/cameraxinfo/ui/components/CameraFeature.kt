@@ -6,10 +6,16 @@ import androidx.compose.ui.res.stringResource
 import dev.zwander.cameraxinfo.R
 
 @Composable
-fun CameraFeature(featureName: String, supported: Boolean) {
+fun CameraFeature(featureName: String, supported: Boolean?) {
+    val (statusText, statusColor) = when (supported) {
+        true -> R.string.supported to Color.Green
+        false -> R.string.unsupported to Color.Red
+        else -> R.string.unknown to Color.Yellow
+    }
+
     CameraItem(
         featureName = featureName,
-        text = stringResource(id = if (supported) R.string.supported else R.string.unsupported),
-        color = if (supported) Color.Green else Color.Red
+        text = stringResource(id = statusText),
+        color = statusColor
     )
 }
