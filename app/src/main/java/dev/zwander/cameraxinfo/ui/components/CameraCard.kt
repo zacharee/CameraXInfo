@@ -15,10 +15,7 @@ import androidx.camera.video.QualitySelector
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,7 +31,7 @@ import kotlinx.coroutines.withContext
 
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
-fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?) {
+fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val cameraManager = remember {
         context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
@@ -56,7 +53,7 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         mutableStateListOf<Pair<String, CameraCharacteristics>>()
     }
     val extensions = remember(which2.cameraId) {
-        mutableStateListOf<Pair<Int, Boolean?>>()
+        mutableStateMapOf<Int, Boolean?>()
     }
 
     LaunchedEffect(key1 = which2.cameraId) {
@@ -81,10 +78,12 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
         ).map {
             it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
         }
-        extensions.addAll(extensionAvailability)
+        extensions.putAll(extensionAvailability)
     }
 
-    PaddedColumnCard {
+    PaddedColumnCard(
+        modifier = modifier
+    ) {
         Text(
             text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
             fontWeight = FontWeight.Bold,

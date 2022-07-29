@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -49,6 +50,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnsafeOptInUsageError")
 @Preview
 @Composable
@@ -87,12 +89,17 @@ fun MainContent() {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item(key = "ARCore") {
-                    ARCoreCard()
+                    ARCoreCard(modifier = Modifier.animateItemPlacement())
                 }
 
                 infos.forEach { (info, info2) ->
                     item(key = info2.cameraId) {
-                        CameraCard(which = info, which2 = info2, extensionsManager = extensionsManager)
+                        CameraCard(
+                            which = info,
+                            which2 = info2,
+                            extensionsManager = extensionsManager,
+                            modifier = Modifier.animateItemPlacement()
+                        )
                     }
                 }
             }

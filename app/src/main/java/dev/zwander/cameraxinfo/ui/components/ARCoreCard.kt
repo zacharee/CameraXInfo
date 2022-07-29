@@ -1,14 +1,15 @@
 package dev.zwander.cameraxinfo.ui.components
 
 import android.content.Context
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 @Composable
-fun ARCoreCard() {
+fun ARCoreCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current.applicationContext
     var arCoreStatus by rememberSaveable {
         mutableStateOf<ArCoreApk.Availability?>(null)
@@ -56,12 +57,26 @@ fun ARCoreCard() {
         arCoreStatus = status
     }
 
-    PaddedColumnCard {
-        Text(
-            text = stringResource(id = R.string.ar_core),
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp
-        )
+    PaddedColumnCard(
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.animateContentSize(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.ar_core),
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp
+            )
+
+            AnimatedVisibility(visible = arCoreStatus == null) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
 
         Divider(
             modifier = Modifier

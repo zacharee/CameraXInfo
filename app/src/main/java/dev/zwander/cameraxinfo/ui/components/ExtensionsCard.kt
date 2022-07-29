@@ -1,7 +1,9 @@
 package dev.zwander.cameraxinfo.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,14 +19,15 @@ import dev.zwander.cameraxinfo.extensionModeToString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExtensionsCard(extensionAvailability: List<Pair<Int, Boolean?>>) {
+fun ExtensionsCard(extensionAvailability: Map<Int, Boolean?>) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(
             1.dp,
             MaterialTheme.colorScheme.contentColorFor(MaterialTheme.colorScheme.surface)
-        )
+        ),
+        modifier = Modifier.animateContentSize().fillMaxWidth()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
