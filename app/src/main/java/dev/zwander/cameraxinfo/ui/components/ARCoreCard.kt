@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,25 +23,31 @@ import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
 import dev.zwander.cameraxinfo.R
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ARCoreCard() {
     val context = LocalContext.current.applicationContext
-    var arCoreStatus by remember {
+    var arCoreStatus by rememberSaveable {
         mutableStateOf<ArCoreApk.Availability?>(null)
     }
-    var depthStatus by remember {
+    var depthStatus by rememberSaveable {
         mutableStateOf<Boolean?>(null)
     }
 
     LaunchedEffect(key1 = null) {
-        val status = ArCoreApk.getInstance().checkAvailability(context).await(context)
+        val status = withContext(Dispatchers.IO) {
+            ArCoreApk.getInstance().checkAvailability(context).await(context)
+        }
 
         depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            val session = Session(context)
-            session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
-                session.close()
+            withContext(Dispatchers.IO) {
+                val session = Session(context)
+                session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
+                    session.close()
+                }
             }
         } else {
             null

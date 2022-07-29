@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import dev.zwander.cameraxinfo.ui.components.ARCoreCard
 import dev.zwander.cameraxinfo.ui.components.CameraCard
 import dev.zwander.cameraxinfo.ui.theme.CameraXInfoTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val permissionsRequester = registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
@@ -61,8 +63,12 @@ fun MainContent() {
     }
 
     LaunchedEffect(key1 = null) {
-        val p = ProcessCameraProvider.getInstance(context).await()
-        extensionsManager = ExtensionsManager.getInstanceAsync(context, p).await()
+        val p = withContext(Dispatchers.IO) {
+            ProcessCameraProvider.getInstance(context).await()
+        }
+        extensionsManager = withContext(Dispatchers.IO) {
+            ExtensionsManager.getInstanceAsync(context, p).await()
+        }
         provider = p
     }
 

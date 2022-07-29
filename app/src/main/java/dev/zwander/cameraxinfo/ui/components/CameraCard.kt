@@ -13,15 +13,12 @@ import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -32,6 +29,8 @@ import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
@@ -62,10 +61,12 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
 
     LaunchedEffect(key1 = which2.cameraId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val logicalChars = cameraManager.getCameraCharacteristics(which2.cameraId)
+            val physicals = withContext(Dispatchers.IO) {
+                val logicalChars = cameraManager.getCameraCharacteristics(which2.cameraId)
 
-            val physicals = logicalChars.physicalCameraIds.map {
-                it to cameraManager.getCameraCharacteristics(it)
+                logicalChars.physicalCameraIds.map {
+                    it to cameraManager.getCameraCharacteristics(it)
+                }
             }
 
             physicalSensors.addAll(physicals)
