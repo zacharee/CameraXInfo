@@ -1,9 +1,12 @@
 package dev.zwander.cameraxinfo
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.DecimalFormat
+import android.net.Uri
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
@@ -85,4 +88,13 @@ fun getFOV(focal: Float, frameSize: SizeF): String {
     return DecimalFormat("##.#").format(
         2f * atan(frameSize.run { height * 16.0 / 9.0 } / (focal * 2f)) * 180 / PI
     )
+}
+
+fun Context.launchUrl(url: String) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(url)
+
+        startActivity(intent)
+    } catch (_: Exception) {}
 }

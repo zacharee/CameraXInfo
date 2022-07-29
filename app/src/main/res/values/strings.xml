@@ -21,6 +21,10 @@
     <string name="installed">Installed</string>
     <string name="not_installed">Not Installed</string>
     <string name="outdated">Outdated</string>
+    <string name="patreon">Patreon</string>
+    <string name="twitter">Twitter</string>
+    <string name="website">Website</string>
+    <string name="supporters">Supporters</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>
