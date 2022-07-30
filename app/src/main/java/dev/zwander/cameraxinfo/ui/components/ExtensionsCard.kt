@@ -54,6 +54,8 @@ fun ExtensionsCard(extensionAvailability: Map<Int, Pair<Boolean?, Boolean?>>) {
                     textAlign = TextAlign.Center
                 )
 
+                Spacer(Modifier.width(8.dp))
+
                 Text(
                     text = stringResource(id = R.string.camerax),
                     modifier = Modifier.weight(COLUMN_WEIGHT),
@@ -80,6 +82,8 @@ fun ExtensionsCard(extensionAvailability: Map<Int, Pair<Boolean?, Boolean?>>) {
                         state = camera2Availability,
                         modifier = Modifier.weight(COLUMN_WEIGHT)
                     )
+
+                    Spacer(Modifier.width(8.dp))
 
                     SupportStateIcon(
                         state = cameraXAvailability,
