@@ -129,25 +129,19 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             fontSize = 18.sp
         )
 
-        FlowRow(
-            mainAxisSize = SizeMode.Expand,
-            mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
-            mainAxisSpacing = 8.dp
-        ) {
-            val (depthText, depthColor) = when (model.depthStatus) {
-                true -> R.string.supported to Color.Green
-                false -> R.string.unsupported to Color.Red
-                else -> R.string.unknown to Color.Yellow
-            }
-
-            val dColor by animateColorAsState(targetValue = depthColor)
-
-            Text(
-                text = stringResource(id = depthText),
-                color = dColor,
-                modifier = Modifier.animateContentSize()
-            )
+        val (depthText, depthColor) = when (model.depthStatus) {
+            true -> R.string.supported to Color.Green
+            false -> R.string.unsupported to Color.Red
+            else -> R.string.unknown to Color.Yellow
         }
+
+        val dColor by animateColorAsState(targetValue = depthColor)
+
+        Text(
+            text = stringResource(id = depthText),
+            color = dColor,
+            modifier = Modifier.animateContentSize()
+        )
     }
 }
 

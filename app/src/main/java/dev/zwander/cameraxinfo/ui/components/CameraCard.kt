@@ -3,6 +3,7 @@ package dev.zwander.cameraxinfo.ui.components
 import android.annotation.SuppressLint
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraExtensionCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.util.SizeF
@@ -31,11 +32,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 private val defaultExtensionState = mapOf(
-    ExtensionMode.AUTO to null,
-    ExtensionMode.BOKEH to null,
-    ExtensionMode.HDR to null,
-    ExtensionMode.NIGHT to null,
-    ExtensionMode.FACE_RETOUCH to null
+    ExtensionMode.AUTO to (null to null),
+    ExtensionMode.BOKEH to (null to null),
+    ExtensionMode.HDR to (null to null),
+    ExtensionMode.NIGHT to (null to null),
+    ExtensionMode.FACE_RETOUCH to (null to null)
 )
 
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
@@ -61,14 +62,25 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
             model.physicalSensors[which2.cameraId] = physicals.toMap()
         }
 
+        val camera2Extensions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            withContext(Dispatchers.IO) {
+                cameraManager.getCameraExtensionCharacteristics(which2.cameraId).supportedExtensions
+            }
+        } else {
+            listOf()
+        }
+
         val extensionAvailability = arrayOf(
-            ExtensionMode.AUTO,
-            ExtensionMode.BOKEH,
-            ExtensionMode.HDR,
-            ExtensionMode.NIGHT,
-            ExtensionMode.FACE_RETOUCH
-        ).map {
-            it to extensionsManager?.isExtensionAvailable(which.cameraSelector, it)
+            ExtensionMode.AUTO to CameraExtensionCharacteristics.EXTENSION_AUTOMATIC,
+            ExtensionMode.BOKEH to CameraExtensionCharacteristics.EXTENSION_BOKEH,
+            ExtensionMode.HDR to CameraExtensionCharacteristics.EXTENSION_HDR,
+            ExtensionMode.NIGHT to CameraExtensionCharacteristics.EXTENSION_NIGHT,
+            ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_BEAUTY
+        ).map { (cameraXExtension, camera2Extension) ->
+            cameraXExtension to run {
+                camera2Extensions.contains(camera2Extension) to
+                        extensionsManager?.isExtensionAvailable(which.cameraSelector, cameraXExtension)
+            }
         }
 
         model.extensions[which2.cameraId] = extensionAvailability.toMap()

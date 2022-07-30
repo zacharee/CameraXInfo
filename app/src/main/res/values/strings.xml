@@ -14,7 +14,7 @@
     <string name="rear_facing">Rear-Facing</string>
     <string name="external">External</string>
     <string name="physical_cameras">Physical Cameras</string>
-    <string name="extensions">Extensions</string>
+    <string name="extension">Extension</string>
     <string name="video_qualities">Video Qualities</string>
     <string name="ar_core">ARCore</string>
     <string name="depth_api">Depth API</string>
@@ -25,6 +25,8 @@
     <string name="twitter">Twitter</string>
     <string name="website">Website</string>
     <string name="supporters">Supporters</string>
+    <string name="camera2">Camera2</string>
+    <string name="camerax">CameraX</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>

@@ -9,7 +9,7 @@ val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 class DataModel {
     val supportedQualities = mutableStateMapOf<String, List<String>>()
     val physicalSensors = mutableStateMapOf<String, Map<String, CameraCharacteristics>>()
-    val extensions = mutableStateMapOf<String, Map<Int, Boolean?>>()
+    val extensions = mutableStateMapOf<String, Map<Int, Pair<Boolean?, Boolean?>>>()
 
     var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
     var depthStatus by mutableStateOf<Boolean?>(null)
