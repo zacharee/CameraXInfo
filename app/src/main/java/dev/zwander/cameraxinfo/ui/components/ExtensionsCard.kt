@@ -71,7 +71,7 @@ fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 56.dp),
+                        .heightIn(min = 48.dp),
                     verticalAlignment = CenterVertically
                 ) {
                     Text(
