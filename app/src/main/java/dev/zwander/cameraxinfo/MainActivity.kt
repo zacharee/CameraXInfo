@@ -34,6 +34,7 @@ import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.ui.components.ARCoreCard
+import dev.zwander.cameraxinfo.ui.components.AnimateInBox
 import dev.zwander.cameraxinfo.ui.components.CameraCard
 import dev.zwander.cameraxinfo.ui.components.InfoCard
 import dev.zwander.cameraxinfo.ui.theme.CameraXInfoTheme
@@ -85,7 +86,7 @@ fun MainContent() {
         LaunchedEffect(key1 = null) {
             val (p, e) = withContext(Dispatchers.IO) {
                 val provider = ProcessCameraProvider.getInstance(context).await()
-                provider to ExtensionsManager.getInstanceAsync(context, provider).await()
+                provider to ExtensionsManager.getInstanceAsync(context, provider)
             }
 
             model.cameraInfos.clear()
@@ -132,7 +133,7 @@ fun MainContent() {
                                 cameraXExtension to ExtensionAvailability(
                                     extension = cameraXExtension,
                                     camera2Availability = camera2Extensions.contains(camera2Extension),
-                                    cameraXAvailability = e.isExtensionAvailable(
+                                    cameraXAvailability = e.await().isExtensionAvailable(
                                         info.cameraSelector,
                                         cameraXExtension
                                     )
@@ -194,19 +195,30 @@ fun MainContent() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     item(key = "InfoCard") {
-                        InfoCard(modifier = Modifier.animateItemPlacement())
+                        AnimateInBox(
+                            modifier = Modifier.animateItemPlacement()
+                        ) {
+                            InfoCard()
+                        }
                     }
 
                     item(key = "ARCore") {
-                        ARCoreCard(modifier = Modifier.animateItemPlacement())
+                        AnimateInBox(
+                            modifier = Modifier.animateItemPlacement()
+                        ) {
+                            ARCoreCard()
+                        }
                     }
 
                     model.cameraInfos.forEach { (_, info2) ->
                         item(key = info2.cameraId) {
-                            CameraCard(
-                                which2 = info2,
+                            AnimateInBox(
                                 modifier = Modifier.animateItemPlacement()
-                            )
+                            ) {
+                                CameraCard(
+                                    which2 = info2,
+                                )
+                            }
                         }
                     }
                 }
