@@ -213,7 +213,7 @@ fun MainContent() {
                             AnimateInBox(
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                InfoCard()
+                                InfoCard(lastRefresh)
                             }
                         }
 

@@ -64,7 +64,7 @@ dependencies {
     implementation "androidx.camera:camera-extensions:${camerax_version}"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:1.6.4"
-    implementation 'com.github.zacharee:PatreonSupportersRetrieval:82a110a218'
+    implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
 
     implementation "com.google.accompanist:accompanist-flowlayout:0.24.13-rc"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"

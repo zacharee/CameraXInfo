@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,23 +25,35 @@ import dev.zwander.cameraxinfo.launchUrl
 import tk.zwander.patreonsupportersretrieval.data.SupporterInfo
 import tk.zwander.patreonsupportersretrieval.util.DataParser
 
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfoCard(modifier: Modifier = Modifier) {
+fun InfoCard(refreshTime: Long, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
-    var showingSupportersList by remember {
+    var showingSupportersList by rememberSaveable {
         mutableStateOf(false)
     }
 
-    val supporters = remember {
+    val supporters = rememberSaveable(
+        saver = listSaver(
+            save = {
+                it
+            },
+            restore = {
+                it.toMutableStateList()
+            }
+        )
+    ) {
         mutableStateListOf<SupporterInfo>()
     }
 
-    LaunchedEffect(key1 = showingSupportersList) {
-        if (showingSupportersList) {
+    LaunchedEffect(key1 = showingSupportersList, key2 = refreshTime) {
+        val newList = DataParser.getInstance(context).parseSupporters()
+
+        if (newList.firstOrNull() != supporters.firstOrNull()) {
             supporters.clear()
-            supporters.addAll(DataParser.getInstance(context).parseSupporters())
+            supporters.addAll(newList)
         }
     }
 
