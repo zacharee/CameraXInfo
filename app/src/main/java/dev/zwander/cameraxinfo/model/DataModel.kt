@@ -6,6 +6,7 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraExtensionCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
+import android.util.Log
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.extensions.ExtensionMode
 import androidx.camera.extensions.ExtensionsManager
@@ -124,25 +125,45 @@ class DataModel {
 
         val status = withContext(Dispatchers.IO) {
             ArCoreApk.getInstance().run {
-                this::class.java.declaredFields.find { it.type == ArCoreApk.Availability::class.java }
-                    ?.apply { isAccessible = true }
-                    ?.set(this, null)
+                try {
+                    this::class.java.declaredFields.find { it.type == ArCoreApk.Availability::class.java }
+                        ?.apply { isAccessible = true }
+                        ?.set(this, null)
+                } catch (e: Exception) {
+                    Log.e("CameraXInfo", "Error unsetting ARCore status", e)
+                }
 
-                awaitAvailability(context)
+                try {
+                    awaitAvailability(context)
+                } catch (e: Exception) {
+                    Log.e("CameraXInfo", "Error awaiting ARCore availability", e)
+                    null
+                }
             }
         }
 
         depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
             withContext(Dispatchers.IO) {
-                val session = Session(context)
-                session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
-                    session.close()
+                try {
+                    val session = Session(context)
+                    session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
+                        session.close()
+                    }
+                } catch (e: Exception) {
+                    Log.e("CameraXInfo", "Error checking depth mode status", e)
+                    false
                 }
             }
         } else {
             null
         }
 
-        arCoreStatus = status
+        arCoreStatus = try {
+            Session(context).close()
+            status
+        } catch (e: Exception) {
+            Log.e("CameraXInfo", "Error opening session", e)
+            ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+        }
     }
 }
