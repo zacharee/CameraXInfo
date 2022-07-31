@@ -102,7 +102,7 @@ fun Context.launchUrl(url: String) {
 }
 
 suspend fun ArCoreApk.awaitAvailability(context: Context): ArCoreApk.Availability {
-    val status = ArCoreApk.getInstance().checkAvailability(context)
+    val status = checkAvailability(context)
 
     return if (status.isTransient) {
         delay(200)
