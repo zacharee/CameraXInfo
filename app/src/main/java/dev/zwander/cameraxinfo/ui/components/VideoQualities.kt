@@ -33,6 +33,8 @@ fun VideoQualities(supportedQualities: List<String>) {
             mainAxisSize = SizeMode.Expand,
             mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             mainAxisSpacing = 8.dp,
+            modifier = Modifier.fillMaxWidth()
+                .animateContentSize()
         ) {
             supportedQualities.forEach {
                 Text(

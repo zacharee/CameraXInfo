@@ -6,6 +6,7 @@ import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.extensions.ExtensionMode
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
@@ -68,7 +69,7 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
                     )
                 )
             },
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp).animateContentSize()
         )
 
         val physicalSensors = model.physicalSensors[which2.cameraId]

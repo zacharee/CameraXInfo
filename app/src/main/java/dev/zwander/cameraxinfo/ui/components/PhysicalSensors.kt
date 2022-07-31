@@ -38,6 +38,8 @@ fun PhysicalSensors(physicalSensors: Map<String, CameraCharacteristics>) {
             mainAxisSize = SizeMode.Expand,
             mainAxisAlignment = MainAxisAlignment.SpaceEvenly,
             mainAxisSpacing = 8.dp,
+            modifier = Modifier.fillMaxWidth()
+                .animateContentSize()
         ) {
             physicalSensors.forEach { (id, chars) ->
                 Text(
