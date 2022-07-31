@@ -3,6 +3,9 @@ package dev.zwander.cameraxinfo.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -50,7 +53,38 @@ fun CameraXInfoTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+        typography = Typography
+    ) {
+        androidx.compose.material.MaterialTheme(
+            colors = if (darkTheme) darkColors(
+                primary = colorScheme.primary,
+                primaryVariant = colorScheme.primaryContainer,
+                onPrimary = colorScheme.onPrimary,
+                secondary = colorScheme.secondary,
+                secondaryVariant = colorScheme.secondaryContainer,
+                onSecondary = colorScheme.onSecondary,
+                background = colorScheme.background,
+                onBackground = colorScheme.onBackground,
+                surface = colorScheme.surface,
+                onSurface = colorScheme.onSurface,
+                error = colorScheme.error,
+                onError = colorScheme.onError
+            ) else lightColors(
+                primary = colorScheme.primary,
+                primaryVariant = colorScheme.primaryContainer,
+                onPrimary = colorScheme.onPrimary,
+                secondary = colorScheme.secondary,
+                secondaryVariant = colorScheme.secondaryContainer,
+                onSecondary = colorScheme.onSecondary,
+                background = colorScheme.background,
+                onBackground = colorScheme.onBackground,
+                surface = colorScheme.surface,
+                onSurface = colorScheme.onSurface,
+                error = colorScheme.error,
+                onError = colorScheme.onError
+            )
+        ) {
+            content()
+        }
+    }
 }

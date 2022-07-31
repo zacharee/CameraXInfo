@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
@@ -83,7 +85,16 @@ fun MainContent() {
             context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         }
 
-        LaunchedEffect(key1 = null) {
+        var lastRefresh by remember {
+            mutableStateOf(System.currentTimeMillis())
+        }
+        var isRefreshing by remember {
+            mutableStateOf(false)
+        }
+
+        LaunchedEffect(key1 = lastRefresh) {
+            isRefreshing = true
+
             val (p, e) = withContext(Dispatchers.IO) {
                 val provider = ProcessCameraProvider.getInstance(context).await()
                 provider to ExtensionsManager.getInstanceAsync(context, provider)
@@ -163,9 +174,7 @@ fun MainContent() {
                     info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
                 }
             )
-        }
 
-        LaunchedEffect(key1 = null) {
             val status = withContext(Dispatchers.IO) {
                 ArCoreApk.getInstance().awaitAvailability(context)
             }
@@ -182,6 +191,8 @@ fun MainContent() {
             }
 
             model.arCoreStatus = status
+
+            isRefreshing = false
         }
 
         CameraXInfoTheme {
@@ -189,35 +200,40 @@ fun MainContent() {
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                SwipeRefresh(
+                    state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+                    onRefresh = { lastRefresh = System.currentTimeMillis() }
                 ) {
-                    item(key = "InfoCard") {
-                        AnimateInBox(
-                            modifier = Modifier.animateItemPlacement()
-                        ) {
-                            InfoCard()
-                        }
-                    }
-
-                    item(key = "ARCore") {
-                        AnimateInBox(
-                            modifier = Modifier.animateItemPlacement()
-                        ) {
-                            ARCoreCard()
-                        }
-                    }
-
-                    model.cameraInfos.forEach { (_, info2) ->
-                        item(key = info2.cameraId) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        item(key = "InfoCard") {
                             AnimateInBox(
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                CameraCard(
-                                    which2 = info2,
-                                )
+                                InfoCard()
+                            }
+                        }
+
+                        item(key = "ARCore") {
+                            AnimateInBox(
+                                modifier = Modifier.animateItemPlacement()
+                            ) {
+                                ARCoreCard()
+                            }
+                        }
+
+                        model.cameraInfos.forEach { (_, info2) ->
+                            item(key = info2.cameraId) {
+                                AnimateInBox(
+                                    modifier = Modifier.animateItemPlacement()
+                                ) {
+                                    CameraCard(
+                                        which2 = info2,
+                                    )
+                                }
                             }
                         }
                     }

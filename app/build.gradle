@@ -52,6 +52,7 @@ dependencies {
     implementation 'androidx.activity:activity-compose:1.5.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation "androidx.compose.material:material:$compose_version"
     implementation 'androidx.compose.material3:material3:1.0.0-alpha14'
 
     implementation "androidx.camera:camera-core:${camerax_version}"
@@ -66,6 +67,7 @@ dependencies {
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:82a110a218'
 
     implementation "com.google.accompanist:accompanist-flowlayout:0.24.13-rc"
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
     implementation 'com.google.android.material:material:1.7.0-alpha03'
     implementation 'com.google.ar:core:1.32.0'
 

@@ -1,14 +1,11 @@
 package dev.zwander.cameraxinfo.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -29,23 +26,11 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
     PaddedColumnCard(
         modifier = modifier.animateContentSize()
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.animateContentSize(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = stringResource(id = R.string.ar_core),
-                fontWeight = FontWeight.Bold,
-                fontSize = 28.sp
-            )
-
-            AnimatedVisibility(visible = model.arCoreStatus == null) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
+        Text(
+            text = stringResource(id = R.string.ar_core),
+            fontWeight = FontWeight.Bold,
+            fontSize = 28.sp
+        )
 
         Divider(
             modifier = Modifier
