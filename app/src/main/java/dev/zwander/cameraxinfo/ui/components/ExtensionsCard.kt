@@ -13,15 +13,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.extensionModeToString
 
 private const val COLUMN_WEIGHT = 0.5f
 
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExtensionsCard(extensionAvailability: Map<Int, Pair<Boolean?, Boolean?>>) {
+fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -65,7 +66,7 @@ fun ExtensionsCard(extensionAvailability: Map<Int, Pair<Boolean?, Boolean?>>) {
             }
 
             extensionAvailability.forEach { (extension, availability) ->
-                val (camera2Availability, cameraXAvailability) = availability
+                val (_, camera2Availability, cameraXAvailability) = availability
 
                 Row(
                     modifier = Modifier

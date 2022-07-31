@@ -1,6 +1,5 @@
 package dev.zwander.cameraxinfo.ui.components
 
-import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -12,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,40 +19,15 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
 import com.google.ar.core.ArCoreApk
-import com.google.ar.core.Config
-import com.google.ar.core.Session
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @Composable
 fun ARCoreCard(modifier: Modifier = Modifier) {
-    val context = LocalContext.current.applicationContext
     val model = LocalDataModel.current
 
-    LaunchedEffect(key1 = null) {
-        val status = withContext(Dispatchers.IO) {
-            ArCoreApk.getInstance().awaitAvailability(context)
-        }
-
-        model.depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            withContext(Dispatchers.IO) {
-                val session = Session(context)
-                session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
-                    session.close()
-                }
-            }
-        } else {
-            null
-        }
-
-        model.arCoreStatus = status
-    }
-
     PaddedColumnCard(
-        modifier = modifier
+        modifier = modifier.animateContentSize()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -142,16 +115,5 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             color = dColor,
             modifier = Modifier.animateContentSize()
         )
-    }
-}
-
-private suspend fun ArCoreApk.awaitAvailability(context: Context): ArCoreApk.Availability {
-    val status = ArCoreApk.getInstance().checkAvailability(context)
-
-    return if (status.isTransient) {
-        delay(200)
-        awaitAvailability(context)
-    } else {
-        status
     }
 }

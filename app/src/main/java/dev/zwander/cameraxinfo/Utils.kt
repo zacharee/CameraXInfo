@@ -24,6 +24,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import com.google.ar.core.ArCoreApk
+import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.atan
 
@@ -97,4 +99,15 @@ fun Context.launchUrl(url: String) {
 
         startActivity(intent)
     } catch (_: Exception) {}
+}
+
+suspend fun ArCoreApk.awaitAvailability(context: Context): ArCoreApk.Availability {
+    val status = ArCoreApk.getInstance().checkAvailability(context)
+
+    return if (status.isTransient) {
+        delay(200)
+        awaitAvailability(context)
+    } else {
+        status
+    }
 }

@@ -1,102 +1,39 @@
 package dev.zwander.cameraxinfo.ui.components
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
-import android.hardware.camera2.CameraExtensionCharacteristics
-import android.hardware.camera2.CameraManager
-import android.os.Build
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
-import androidx.camera.core.CameraInfo
 import androidx.camera.extensions.ExtensionMode
-import androidx.camera.extensions.ExtensionsManager
-import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 private val defaultExtensionState = mapOf(
-    ExtensionMode.AUTO to (null to null),
-    ExtensionMode.BOKEH to (null to null),
-    ExtensionMode.HDR to (null to null),
-    ExtensionMode.NIGHT to (null to null),
-    ExtensionMode.FACE_RETOUCH to (null to null)
+    ExtensionMode.AUTO to ExtensionAvailability(ExtensionMode.AUTO),
+    ExtensionMode.BOKEH to ExtensionAvailability(ExtensionMode.BOKEH),
+    ExtensionMode.HDR to ExtensionAvailability(ExtensionMode.HDR),
+    ExtensionMode.NIGHT to ExtensionAvailability(ExtensionMode.NIGHT),
+    ExtensionMode.FACE_RETOUCH to ExtensionAvailability(ExtensionMode.FACE_RETOUCH)
 )
 
 @SuppressLint("UnsafeOptInUsageError", "RestrictedApi")
 @Composable
-fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: ExtensionsManager?, modifier: Modifier = Modifier) {
-    val context = LocalContext.current
+fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
     val model = LocalDataModel.current
-
-    val cameraManager = remember {
-        context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-    }
-
-    LaunchedEffect(key1 = which2.cameraId) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val physicals = withContext(Dispatchers.IO) {
-                val logicalChars = cameraManager.getCameraCharacteristics(which2.cameraId)
-
-                logicalChars.physicalCameraIds.map {
-                    it to cameraManager.getCameraCharacteristics(it)
-                }
-            }
-
-            model.physicalSensors[which2.cameraId] = physicals.toMap()
-        }
-
-        val camera2Extensions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            withContext(Dispatchers.IO) {
-                cameraManager.getCameraExtensionCharacteristics(which2.cameraId).supportedExtensions
-            }
-        } else {
-            listOf()
-        }
-
-        val extensionAvailability = arrayOf(
-            ExtensionMode.AUTO to CameraExtensionCharacteristics.EXTENSION_AUTOMATIC,
-            ExtensionMode.BOKEH to CameraExtensionCharacteristics.EXTENSION_BOKEH,
-            ExtensionMode.HDR to CameraExtensionCharacteristics.EXTENSION_HDR,
-            ExtensionMode.NIGHT to CameraExtensionCharacteristics.EXTENSION_NIGHT,
-            ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_BEAUTY
-        ).map { (cameraXExtension, camera2Extension) ->
-            cameraXExtension to run {
-                camera2Extensions.contains(camera2Extension) to
-                        extensionsManager?.isExtensionAvailable(which.cameraSelector, cameraXExtension)
-            }
-        }
-
-        model.extensions[which2.cameraId] = extensionAvailability.toMap()
-
-        model.supportedQualities[which2.cameraId] = QualitySelector.getSupportedQualities(which).map {
-            context.resources.getString(
-                when (it) {
-                    Quality.SD -> (R.string.sd)
-                    Quality.HD -> (R.string.hd)
-                    Quality.FHD -> (R.string.fhd)
-                    Quality.UHD -> (R.string.uhd)
-                    else -> (R.string.unknown)
-                }
-            )
-        }.asReversed()
-    }
 
     PaddedColumnCard(
         modifier = modifier
@@ -134,19 +71,23 @@ fun CameraCard(which: CameraInfo, which2: Camera2CameraInfo, extensionsManager: 
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        model.physicalSensors[which2.cameraId]?.let { physicalSensors ->
-            if (physicalSensors.isNotEmpty()) {
+        val physicalSensors = model.physicalSensors[which2.cameraId]
+
+        AnimatedVisibility(visible = physicalSensors?.isNotEmpty() == true) {
+            Column {
                 Spacer(modifier = Modifier.size(4.dp))
 
-                PhysicalSensors(physicalSensors = physicalSensors)
+                PhysicalSensors(physicalSensors = physicalSensors ?: mapOf())
             }
         }
 
-        model.supportedQualities[which2.cameraId]?.let { supportedQualities ->
-            if (supportedQualities.isNotEmpty()) {
+        val supportedQualities = model.supportedQualities[which2.cameraId]
+
+        AnimatedVisibility(visible = supportedQualities?.isNotEmpty() == true) {
+            Column {
                 Spacer(modifier = Modifier.size(4.dp))
 
-                VideoQualities(supportedQualities = supportedQualities)
+                VideoQualities(supportedQualities = supportedQualities ?: listOf())
             }
         }
 
