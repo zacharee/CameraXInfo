@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">CameraX Info</string>
+
+    <string name="auto">Automatico</string>
+    <string name="bokeh">Bokeh</string>
+    <string name="hdr">HDR</string>
+    <string name="night">Notte</string>
+    <string name="face_retouch">Ritocco viso</string>
+    <string name="none">Nessuna</string>
+    <string name="supported">Supportata</string>
+    <string name="unsupported">Non supportata</string>
+    <string name="unknown">Sconosciuta</string>
+    <string name="front_facing">Sul davanti</string>
+    <string name="rear_facing">Sul retro</string>
+    <string name="external">Esterno</string>
+    <string name="extension">Estensione</string>
+    <string name="video_qualities">Qualità video</string>
+    <string name="ar_core">ARCore</string>
+    <string name="depth_api">Profondità</string>
+    <string name="installed">Installata</string>
+    <string name="not_installed">Non installata</string>
+    <string name="outdated">Obsoleta</string>
+    <string name="patreon">Patreon</string>
+    <string name="twitter">Twitter</string>
+    <string name="website">Sito web</string>
+    <string name="supporters">Supporter</string>
+    <string name="camera2">Camera2</string>
+    <string name="camerax">CameraX</string>
+    <string name="not_applicable">Non applicabile</string>
+    <string name="status">Stato</string>
+    <string name="quality">Qualità</string>
+    <string name="angle">Angolo</string>
+    <string name="physical">Fisico</string>
+
+    <string name="sd">480p</string>
+    <string name="hd">720p</string>
+    <string name="fhd">1080p</string>
+    <string name="uhd">2160p</string>
+
+    <string name="mp_format">%sMP</string>
+    <string name="deg_format">%s˚</string>
+
+    <string name="logical_camera_format">Camera %s</string>
+    <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
+</resources>
