@@ -13,7 +13,6 @@
     <string name="front_facing">Front Facing</string>
     <string name="rear_facing">Rear-Facing</string>
     <string name="external">External</string>
-    <string name="physical_cameras">Physical Cameras</string>
     <string name="extension">Extension</string>
     <string name="video_qualities">Video Qualities</string>
     <string name="ar_core">ARCore</string>
