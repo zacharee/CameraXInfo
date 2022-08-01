@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "339219575092",
+    "project_id": "camerax-info",
+    "storage_bucket": "camerax-info.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339219575092:android:eac3144b7f4b51cf5ab561",
+        "android_client_info": {
+          "package_name": "dev.zwander.cameraxinfo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "339219575092-q3a6j6m1qlrohmsd0ut6drl9nhjpjicp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "dev.zwander.cameraxinfo",
+            "certificate_hash": "12931c3d498a30c8024cd17b18e0a823a0322d43"
+          }
+        },
+        {
+          "client_id": "339219575092-kn1agla5rdbpqum1uaj6c9lnk495v30t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmC5_n3Nu60HUiebUfzyEC_aRW9VPLjII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "339219575092-kn1agla5rdbpqum1uaj6c9lnk495v30t.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

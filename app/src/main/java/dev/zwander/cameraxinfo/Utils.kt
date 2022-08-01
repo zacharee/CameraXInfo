@@ -24,6 +24,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.delay
 import kotlin.math.PI
@@ -48,10 +50,9 @@ fun Spanned.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
     }
 }
 
-@Composable
-fun Int?.lensFacingToString(): String {
-    return stringResource(
-        id = when (this) {
+fun Int?.lensFacingToString(context: Context): String {
+    return context.resources.getString(
+        when (this) {
             CameraCharacteristics.LENS_FACING_FRONT -> R.string.front_facing
             CameraCharacteristics.LENS_FACING_BACK -> R.string.rear_facing
             CameraCharacteristics.LENS_FACING_EXTERNAL -> R.string.external
@@ -60,10 +61,9 @@ fun Int?.lensFacingToString(): String {
     )
 }
 
-@Composable
-fun Int.extensionModeToString(): String {
-    return stringResource(
-        id = when (this) {
+fun Int.extensionModeToString(context: Context): String {
+    return context.resources.getString(
+        when (this) {
             ExtensionMode.AUTO -> R.string.auto
             ExtensionMode.BOKEH -> R.string.bokeh
             ExtensionMode.HDR -> R.string.hdr
@@ -111,3 +111,11 @@ suspend fun ArCoreApk.awaitAvailability(context: Context): ArCoreApk.Availabilit
         status
     }
 }
+
+var Context.latestUploadTime: Long
+    get() = PreferenceManager.getDefaultSharedPreferences(this).getLong("upload_time", 0L)
+    set(value) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit {
+            putLong("upload_time", value)
+        }
+    }

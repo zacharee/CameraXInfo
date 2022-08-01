@@ -19,10 +19,7 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import dev.zwander.cameraxinfo.ui.components.ARCoreCard
-import dev.zwander.cameraxinfo.ui.components.AnimateInBox
-import dev.zwander.cameraxinfo.ui.components.CameraCard
-import dev.zwander.cameraxinfo.ui.components.InfoCard
+import dev.zwander.cameraxinfo.ui.components.*
 import dev.zwander.cameraxinfo.ui.theme.CameraXInfoTheme
 
 class MainActivity : ComponentActivity() {
@@ -96,6 +93,14 @@ fun MainContent() {
                                 modifier = Modifier.animateItemPlacement()
                             ) {
                                 InfoCard(lastRefresh)
+                            }
+                        }
+
+                        item(key = "UploadCard") {
+                            AnimateInBox(
+                                modifier = Modifier.animateItemPlacement()
+                            ) {
+                                UploadCard(lastRefresh)
                             }
                         }
 

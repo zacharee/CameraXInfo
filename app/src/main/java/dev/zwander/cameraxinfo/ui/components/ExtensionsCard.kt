@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,7 +76,7 @@ fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
                     verticalAlignment = CenterVertically
                 ) {
                     Text(
-                        text = extension.extensionModeToString(),
+                        text = extension.extensionModeToString(LocalContext.current),
                         modifier = Modifier.weight(1f)
                     )
 

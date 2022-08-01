@@ -12,6 +12,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,7 @@ import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 import dev.zwander.cameraxinfo.model.LocalDataModel
 
-private val defaultExtensionState = mapOf(
+val defaultExtensionState = mapOf(
     ExtensionMode.AUTO to ExtensionAvailability(ExtensionMode.AUTO),
     ExtensionMode.BOKEH to ExtensionAvailability(ExtensionMode.BOKEH),
     ExtensionMode.HDR to ExtensionAvailability(ExtensionMode.HDR),
@@ -54,12 +55,12 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
         Text(
             text = if (model.physicalSensors[which2.cameraId]?.isNotEmpty() == true) {
                 which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
-                    .lensFacingToString()
+                    .lensFacingToString(LocalContext.current)
             } else {
                 stringResource(
                     id = R.string.camera_direction_format,
                     which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
-                        .lensFacingToString(),
+                        .lensFacingToString(LocalContext.current),
                     which2.formatResolution(),
                     getFOV(
                         which2.getCameraCharacteristic(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)

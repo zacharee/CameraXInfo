@@ -31,6 +31,15 @@
     <string name="quality">Quality</string>
     <string name="angle">Angle</string>
     <string name="physical">Physical</string>
+    <string name="upload">Upload</string>
+    <string name="uploading">Uploading…</string>
+    <string name="success">Success!</string>
+    <string name="error">Error: %s.</string>
+    <string name="ok">OK</string>
+    <string name="browse">Browse</string>
+    <string name="back">Back</string>
+    <string name="download">Download</string>
+    <string name="rate_limited">Rate Limited!</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>
@@ -42,4 +51,5 @@
 
     <string name="logical_camera_format">Camera %s</string>
     <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
+    <string name="upload_desc">Upload your camera info to a central database anonymously.</string>
 </resources>
