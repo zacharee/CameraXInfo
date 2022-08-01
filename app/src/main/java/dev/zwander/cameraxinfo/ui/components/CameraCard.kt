@@ -72,16 +72,6 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
             modifier = Modifier.padding(bottom = 8.dp).animateContentSize()
         )
 
-        val physicalSensors = model.physicalSensors[which2.cameraId]
-
-        AnimatedVisibility(visible = physicalSensors?.isNotEmpty() == true) {
-            Column {
-                Spacer(modifier = Modifier.size(4.dp))
-
-                PhysicalSensors(physicalSensors = physicalSensors ?: mapOf())
-            }
-        }
-
         val supportedQualities = model.supportedQualities[which2.cameraId]
 
         AnimatedVisibility(visible = supportedQualities?.isNotEmpty() == true) {
@@ -89,6 +79,16 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.size(4.dp))
 
                 VideoQualities(supportedQualities = supportedQualities ?: listOf())
+            }
+        }
+
+        val physicalSensors = model.physicalSensors[which2.cameraId]
+
+        AnimatedVisibility(visible = physicalSensors?.isNotEmpty() == true) {
+            Column {
+                Spacer(modifier = Modifier.size(8.dp))
+
+                PhysicalSensors(physicalSensors = physicalSensors ?: mapOf())
             }
         }
 

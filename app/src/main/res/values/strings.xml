@@ -29,13 +29,18 @@
     <string name="camerax">CameraX</string>
     <string name="not_applicable">Not Applicable</string>
     <string name="status">Status</string>
+    <string name="quality">Quality</string>
+    <string name="angle">Angle</string>
+    <string name="physical">Physical</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>
     <string name="fhd">1080p</string>
     <string name="uhd">2160p</string>
 
+    <string name="mp_format">%sMP</string>
+    <string name="deg_format">%s˚</string>
+
     <string name="logical_camera_format">Camera %s</string>
     <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
-    <string name="physical_camera_format"><![CDATA[<b>%1$s:</b> %2$sMP, %3$s˚]]></string>
 </resources>
