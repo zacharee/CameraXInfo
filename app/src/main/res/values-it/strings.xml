@@ -10,8 +10,8 @@
     <string name="supported">Supportata</string>
     <string name="unsupported">Non supportata</string>
     <string name="unknown">Sconosciuta</string>
-    <string name="front_facing">Sul davanti</string>
-    <string name="rear_facing">Sul retro</string>
+    <string name="front_facing">Frontale</string>
+    <string name="rear_facing">Posteriore</string>
     <string name="external">Esterno</string>
     <string name="extension">Estensione</string>
     <string name="video_qualities">Qualità video</string>
