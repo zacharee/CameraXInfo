@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CameraX Info</string>
 
-    <string name="auto">Automatico</string>
+    <string name="auto">Automatica</string>
     <string name="bokeh">Bokeh</string>
     <string name="hdr">HDR</string>
     <string name="night">Notte</string>
