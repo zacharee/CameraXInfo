@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -12,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
@@ -37,11 +40,10 @@ import dev.zwander.cameraxinfo.util.awaitCatchingError
 import dev.zwander.cameraxinfo.util.uploadToCloud
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlin.math.absoluteValue
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun UploadCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -81,44 +83,77 @@ fun UploadCard(modifier: Modifier = Modifier) {
     }
 
     if (uploadStatus != null) {
-        AlertDialog(
-            modifier = Modifier.wrapContentHeight(),
+        Dialog(
             onDismissRequest = { uploadStatus = null },
-            confirmButton = {
-                TextButton(
-                    onClick = { uploadStatus = null },
-                    enabled = uploadStatus?.e != null || uploadStatus == UploadResult.DuplicateData
-                ) {
-                    Text(text = stringResource(id = R.string.ok))
-                }
-            },
             properties = DialogProperties(
                 dismissOnBackPress = false,
-                dismissOnClickOutside = false
+                dismissOnClickOutside = false,
+                usePlatformDefaultWidth = false
             ),
-            title = {
-                Text(text = stringResource(id = R.string.uploading))
-            },
-            text = {
+        ) {
+            Surface(
+                modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth(0.75f),
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
                 Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                        .wrapContentHeight()
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .padding(16.dp)
                 ) {
-                    if (uploadStatus == UploadResult.Uploading) {
-                        CircularProgressIndicator()
+                    Text(
+                        text = stringResource(id = R.string.uploading),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(Modifier.size(16.dp))
+
+                    Crossfade(
+                        targetState = uploadStatus,
+                    ) {
+                        when (it) {
+                            UploadResult.Uploading -> {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                            else -> {
+                                Text(
+                                    text = when {
+                                        uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
+                                        uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
+                                        else -> ""
+                                    }
+                                )
+                            }
+                        }
                     }
 
-                    Text(
-                        text = when {
-                            uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
-                            uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
-                            else -> ""
+                    AnimatedVisibility(
+                        visible = uploadStatus?.e != null || uploadStatus == UploadResult.DuplicateData,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Column {
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            TextButton(
+                                onClick = { uploadStatus = null },
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.ok),
+                                )
+                            }
                         }
-                    )
+                    }
                 }
             }
-        )
+        }
     }
 
     PaddedColumnCard(
