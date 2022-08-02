@@ -5,7 +5,6 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.SimpleDateFormat
 import android.os.Build
-import android.util.Log
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
@@ -67,26 +66,9 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         .set("data" to buildInfo(context))
     val result = task.await()
 
-    firestore.collectionGroup("CameraDataNode").get().await().forEach { doc ->
-        Log.e("CameraXInfo", doc.reference.path)
-    }
-
     if (!task.isSuccessful) {
         return UploadResult.UploadFailure(task.exception)
     }
-
-//    val storage = Firebase.storage
-//    val directory = storage.getReference("/CameraData/${Build.BRAND.uppercase()}/${Build.MODEL.uppercase()}/${Build.VERSION.SDK_INT}")
-//    val file = directory.child("${sdf.format(Date())}.json")
-//
-//    val content = buildInfo(context)
-//
-//    val uploadTask = file.putBytes(content.toByteArray())
-//    val uploadResult = uploadTask.await()
-//
-//    if (!uploadTask.isSuccessful) {
-//        return UploadResult.UploadFailure(uploadResult.error)
-//    }
 
     return UploadResult.Success
 }

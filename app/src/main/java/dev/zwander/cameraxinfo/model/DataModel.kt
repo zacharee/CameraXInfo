@@ -17,11 +17,11 @@ import androidx.compose.runtime.*
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import com.google.firebase.storage.StorageReference
 import dev.zwander.cameraxinfo.awaitAvailability
 import dev.zwander.cameraxinfo.data.CameraInfoHolder
 import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.data.Node
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
 
@@ -36,11 +36,13 @@ class DataModel {
     var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
     var depthStatus by mutableStateOf<Boolean?>(null)
 
-    var currentReference by mutableStateOf<StorageReference?>(null)
-    val currentPrefixListing = mutableStateListOf<StorageReference>()
-    val currentItemListing = mutableStateListOf<StorageReference>()
-    var currentItemReference by mutableStateOf<StorageReference?>(null)
-    var currentItemText by mutableStateOf<String?>(null)
+//    var currentReference by mutableStateOf<StorageReference?>(null)
+//    val currentPrefixListing = mutableStateListOf<StorageReference>()
+//    val currentItemListing = mutableStateListOf<StorageReference>()
+//    var currentItemReference by mutableStateOf<StorageReference?>(null)
+//    var currentItemText by mutableStateOf<String?>(null)
+
+    var currentPath by mutableStateOf<Node?>(null)
 
     @SuppressLint("UnsafeOptInUsageError", "InlinedApi")
     suspend fun populate(context: Context) = coroutineScope {

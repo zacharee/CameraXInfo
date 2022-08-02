@@ -1,6 +1,5 @@
 package dev.zwander.cameraxinfo.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,19 +10,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.StorageReference
-import com.google.firebase.storage.ktx.storage
 import dev.zwander.cameraxinfo.R
-import dev.zwander.cameraxinfo.launchUrl
+import dev.zwander.cameraxinfo.data.Node
+import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
@@ -33,29 +29,15 @@ fun DataBrowser(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val model = LocalDataModel.current
-
-    val storage = Firebase.storage
     val firestore = Firebase.firestore
 
     LaunchedEffect(key1 = lastRefreshTime) {
-        if (model.currentReference == null) {
-            model.currentReference = storage.getReference("/CameraData")
+        if (model.currentPath == null) {
+            withContext(Dispatchers.IO) {
+                model.currentPath = firestore.collectionGroup("CameraDataNode").get().await().createTreeFromPaths()
+            }
         }
-    }
-
-    LaunchedEffect(key1 = model.currentReference, key2 = lastRefreshTime) {
-        val (prefixes, items) = withContext(Dispatchers.IO) {
-            model.currentReference?.listAll()?.await()?.run { prefixes to items }
-        } ?: (listOf<StorageReference>() to listOf())
-
-        model.currentPrefixListing.clear()
-        model.currentItemListing.clear()
-
-        model.currentPrefixListing.addAll(prefixes)
-        model.currentItemListing.addAll(items)
     }
 
     Column(
@@ -69,14 +51,10 @@ fun DataBrowser(
         ) {
             IconButton(
                 onClick = {
-                    model.currentReference?.parent.apply {
+                    model.currentPath?.parent?.apply {
                         when {
-                            model.currentItemReference != null -> {
-                                model.currentItemReference = null
-                                model.currentItemText = null
-                            }
-                            this == null || model.currentReference?.name == "CameraData" -> onDismissRequest()
-                            else -> model.currentReference = this
+                            this() == null -> onDismissRequest()
+                            else -> model.currentPath = this()
                         }
                     }
                 }
@@ -85,25 +63,6 @@ fun DataBrowser(
                     painter = painterResource(id = R.drawable.back),
                     contentDescription = stringResource(id = R.string.back)
                 )
-            }
-
-            AnimatedVisibility(visible = model.currentItemReference != null) {
-                IconButton(
-                    onClick = {
-                        scope.launch(Dispatchers.IO) {
-                            context.launchUrl(
-                                model.currentItemReference!!.downloadUrl
-                                    .await()
-                                    .toString()
-                            )
-                        }
-                    }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.download),
-                        contentDescription = stringResource(id = R.string.download)
-                    )
-                }
             }
 
             Spacer(Modifier.size(8.dp))
@@ -115,7 +74,7 @@ fun DataBrowser(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = model.currentItemReference?.path ?: model.currentReference?.path ?: ""
+                    text = model.currentPath?.absolutePath ?: ""
                 )
             }
         }
@@ -125,18 +84,10 @@ fun DataBrowser(
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (model.currentItemReference == null) {
-                items(items = model.currentPrefixListing.toList(), key = { it.path }) {
+            if (model.currentPath?.content == null) {
+                items(items = model.currentPath?.children ?: listOf(), key = { it.absolutePath }) {
                     it.StorageListItem {
-                        model.currentReference = it
-                    }
-                }
-
-                items(items = model.currentItemListing.toList(), key = { it.path }) {
-                    it.StorageListItem {
-                        scope.launch(Dispatchers.IO) {
-                            model.currentItemReference = it
-                        }
+                        model.currentPath = it
                     }
                 }
             } else {
@@ -146,17 +97,9 @@ fun DataBrowser(
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState())
                     ) {
-                        LaunchedEffect(null) {
-                            if (model.currentItemText == null) {
-                                model.currentItemText = withContext(Dispatchers.IO) {
-                                    model.currentItemReference?.stream?.await()?.stream?.bufferedReader()?.use { reader -> reader.readText() } ?: ""
-                                }
-                            }
-                        }
-
                         SelectionContainer {
                             Text(
-                                text = model.currentItemText ?: ""
+                                text = model.currentPath?.content ?: ""
                             )
                         }
                     }
@@ -169,7 +112,7 @@ fun DataBrowser(
 @Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StorageReference.StorageListItem(onClick: () -> Unit) {
+private fun Node.StorageListItem(onClick: () -> Unit) {
     Card(
         onClick = onClick
     ) {

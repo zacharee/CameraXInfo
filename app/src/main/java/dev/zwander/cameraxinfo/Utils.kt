@@ -3,52 +3,19 @@ package dev.zwander.cameraxinfo
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.DecimalFormat
 import android.net.Uri
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.text.style.UnderlineSpan
 import android.util.Size
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.extensions.ExtensionMode
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.delay
 import kotlin.math.PI
 import kotlin.math.atan
-
-// https://stackoverflow.com/a/68935732/5496177
-fun Spanned.toAnnotatedString(): AnnotatedString = buildAnnotatedString {
-    val spanned = this@toAnnotatedString
-    append(spanned.toString())
-    getSpans(0, spanned.length, Any::class.java).forEach { span ->
-        val start = getSpanStart(span)
-        val end = getSpanEnd(span)
-        when (span) {
-            is StyleSpan -> when (span.style) {
-                Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
-                Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
-                Typeface.BOLD_ITALIC -> addStyle(SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic), start, end)
-            }
-            is UnderlineSpan -> addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
-            is ForegroundColorSpan -> addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
-        }
-    }
-}
 
 fun Int?.lensFacingToString(context: Context): String {
     return context.resources.getString(
@@ -117,5 +84,13 @@ var Context.latestUploadTime: Long
     set(value) {
         PreferenceManager.getDefaultSharedPreferences(this).edit {
             putLong("upload_time", value)
+        }
+    }
+
+var Context.latestDownloadTime: Long
+    get() = PreferenceManager.getDefaultSharedPreferences(this).getLong("download_time", 0L)
+    set(value) {
+        PreferenceManager.getDefaultSharedPreferences(this).edit {
+            putLong("download_time", value)
         }
     }

@@ -1,7 +1,6 @@
 package dev.zwander.cameraxinfo.ui.components
 
 import android.hardware.camera2.CameraCharacteristics
-import android.text.Html
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -15,15 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
-import androidx.compose.ui.unit.sp
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
-import dev.zwander.cameraxinfo.toAnnotatedString
 
 private const val COLUMN_WEIGHT = 0.5f
 

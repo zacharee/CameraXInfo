@@ -1,6 +1,9 @@
 package dev.zwander.cameraxinfo.ui.components
 
+import android.webkit.MimeTypeMap
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -18,18 +21,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import com.android.internal.R.attr.visible
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.data.createZipFile
+import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.util.UploadResult
 import dev.zwander.cameraxinfo.util.uploadToCloud
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlin.math.absoluteValue
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
@@ -39,6 +46,24 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val model = LocalDataModel.current
     val scope = rememberCoroutineScope()
+
+    val saver = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument(
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension("zip")
+        )
+    ) { result ->
+        result?.let { uri ->
+            scope.launch(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri).use { writer ->
+                    Firebase.firestore.collectionGroup("CameraDataNode").get().await()
+                        .createZipFile(context)
+                        .inputStream().use { reader ->
+                            reader.copyTo(writer)
+                        }
+                }
+            }
+        }
+    }
 
     var uploadStatus by rememberSaveable {
         mutableStateOf<UploadResult?>(null)
@@ -58,7 +83,10 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
         AlertDialog(
             onDismissRequest = { uploadStatus = null },
             confirmButton = { if (uploadStatus?.e != null) Text(text = stringResource(id = R.string.ok)) },
-            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false),
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            ),
             title = { Text(text = stringResource(id = R.string.uploading)) },
             text = {
                 Column(
@@ -124,6 +152,21 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
                 }
             ) {
                 Text(text = stringResource(id = R.string.upload))
+            }
+
+            Button(
+                onClick = {
+                    val currentTime = System.currentTimeMillis()
+
+                    if (!BuildConfig.DEBUG && (context.latestDownloadTime - currentTime).absoluteValue < 30_000) {
+                        Toast.makeText(context, R.string.rate_limited, Toast.LENGTH_SHORT).show()
+                    } else {
+                        context.latestDownloadTime = currentTime
+                        saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
+                    }
+                }
+            ) {
+                Text(text = stringResource(id = R.string.download))
             }
 
             Button(
