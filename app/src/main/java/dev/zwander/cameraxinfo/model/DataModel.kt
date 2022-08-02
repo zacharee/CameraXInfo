@@ -28,7 +28,6 @@ import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import dev.zwander.cameraxinfo.util.awaitCatchingError
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
-import kotlinx.coroutines.tasks.await
 
 val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 
@@ -47,7 +46,17 @@ class DataModel {
         val firestore = Firebase.firestore
 
         currentPath = null
-        currentPath = firestore.collectionGroup("CameraDataNode").get().awaitCatchingError().createTreeFromPaths()
+
+        val group = firestore.collectionGroup("CameraDataNode")
+        val g = group.addSnapshotListener { _, _ -> }
+
+        currentPath = try {
+            group.get().awaitCatchingError().createTreeFromPaths()
+        } catch (e: Exception) {
+            Log.e("CameraXInfo", "Error getting data", e)
+            null
+        }
+        g.remove()
     }
 
     @SuppressLint("UnsafeOptInUsageError", "InlinedApi")

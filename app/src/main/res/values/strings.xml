@@ -34,7 +34,7 @@
     <string name="upload">Upload</string>
     <string name="uploading">Uploading…</string>
     <string name="success">Success!</string>
-    <string name="error">Error: %s.</string>
+    <string name="error">Error: %s</string>
     <string name="ok">OK</string>
     <string name="browse">Browse</string>
     <string name="back">Back</string>

@@ -9,6 +9,9 @@ import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.BuildConfig
@@ -17,7 +20,6 @@ import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.ui.components.defaultExtensionState
-import kotlinx.coroutines.tasks.await
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
@@ -61,6 +63,9 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
     try {
         val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
 
+        val querySnapshotListener = EventListener<QuerySnapshot> { _, _ -> }
+        val documentSnapshotListener = EventListener<DocumentSnapshot> { _, _ -> }
+
         val firestore = Firebase.firestore
         val collection = firestore
             .collection("CameraData")
@@ -69,16 +74,21 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
             .document(Build.VERSION.SDK_INT.toString())
             .collection("CameraDataNode")
 
+        val c = collection.addSnapshotListener(querySnapshotListener)
         val existingDocs = collection.get().awaitCatchingError().map { it.data.values.last().toString() }
+        c.remove()
+
         val newInfo = buildInfo(context)
 
         if (BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
             return UploadResult.DuplicateData
         }
 
-        val task = collection.document(sdf.format(Date()))
-            .set("data" to newInfo)
+        val doc = collection.document(sdf.format(Date()))
+        val d = doc.addSnapshotListener(documentSnapshotListener)
+        val task = doc.set("data" to newInfo)
         task.awaitCatchingError()
+        d.remove()
 
         if (!task.isSuccessful) {
             return UploadResult.UploadFailure(task.exception)
