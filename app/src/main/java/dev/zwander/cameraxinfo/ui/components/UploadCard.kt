@@ -42,7 +42,7 @@ import kotlin.math.absoluteValue
 @Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
+fun UploadCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val model = LocalDataModel.current
     val scope = rememberCoroutineScope()
@@ -208,11 +208,11 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
                         .fillMaxWidth(),
                 ) {
                     DataBrowser(
-                        lastRefreshTime = lastRefreshTime,
                         onDismissRequest = { browsing = false },
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 300.dp)
+                            .animateContentSize()
                             .padding(4.dp)
                     )
                 }

@@ -13,29 +13,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
-import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 @Composable
 fun DataBrowser(
-    lastRefreshTime: Long,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model = LocalDataModel.current
-    val firestore = Firebase.firestore
 
-    LaunchedEffect(key1 = lastRefreshTime) {
+    LaunchedEffect(key1 = null) {
         if (model.currentPath == null) {
             withContext(Dispatchers.IO) {
-                model.currentPath = firestore.collectionGroup("CameraDataNode").get().await().createTreeFromPaths()
+                model.populatePath()
             }
         }
     }

@@ -107,7 +107,7 @@ fun MainContent() {
                             AnimateInBox(
                                 modifier = Modifier.animateItemPlacement()
                             ) {
-                                UploadCard(lastRefresh)
+                                UploadCard()
                             }
                         }
 

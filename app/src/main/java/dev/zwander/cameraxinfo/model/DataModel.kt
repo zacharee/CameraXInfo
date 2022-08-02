@@ -17,13 +17,17 @@ import androidx.compose.runtime.*
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.awaitAvailability
 import dev.zwander.cameraxinfo.data.CameraInfoHolder
 import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
+import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.tasks.await
 
 val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 
@@ -36,17 +40,23 @@ class DataModel {
     var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
     var depthStatus by mutableStateOf<Boolean?>(null)
 
-//    var currentReference by mutableStateOf<StorageReference?>(null)
-//    val currentPrefixListing = mutableStateListOf<StorageReference>()
-//    val currentItemListing = mutableStateListOf<StorageReference>()
-//    var currentItemReference by mutableStateOf<StorageReference?>(null)
-//    var currentItemText by mutableStateOf<String?>(null)
-
     var currentPath by mutableStateOf<Node?>(null)
+
+    suspend fun populatePath() = coroutineScope {
+        val firestore = Firebase.firestore
+
+        currentPath = firestore.collectionGroup("CameraDataNode").get().await().createTreeFromPaths()
+    }
 
     @SuppressLint("UnsafeOptInUsageError", "InlinedApi")
     suspend fun populate(context: Context) = coroutineScope {
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+
+        if (currentPath != null) {
+            withContext(Dispatchers.IO) {
+                populatePath()
+            }
+        }
 
         extensions.clear()
         arCoreStatus = null
