@@ -40,6 +40,7 @@
     <string name="back">Back</string>
     <string name="download">Download</string>
     <string name="rate_limited">Rate Limited!</string>
+    <string name="loading">Loading</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>

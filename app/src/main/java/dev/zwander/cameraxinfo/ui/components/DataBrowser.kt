@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.android.internal.R.string.loading
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.model.LocalDataModel
@@ -68,7 +69,7 @@ fun DataBrowser(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = model.currentPath?.absolutePath ?: ""
+                    text = model.currentPath?.absolutePath ?: stringResource(id = R.string.loading)
                 )
             }
         }
@@ -78,6 +79,17 @@ fun DataBrowser(
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (model.currentPath == null) {
+                item(key = "LoadingIndicator") {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+
             if (model.currentPath?.content == null) {
                 items(items = model.currentPath?.children ?: listOf(), key = { it.absolutePath }) {
                     it.StorageListItem {

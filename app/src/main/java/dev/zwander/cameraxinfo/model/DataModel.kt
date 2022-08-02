@@ -46,6 +46,7 @@ class DataModel {
     suspend fun populatePath() = coroutineScope {
         val firestore = Firebase.firestore
 
+        currentPath = null
         currentPath = firestore.collectionGroup("CameraDataNode").get().awaitCatchingError().createTreeFromPaths()
     }
 
