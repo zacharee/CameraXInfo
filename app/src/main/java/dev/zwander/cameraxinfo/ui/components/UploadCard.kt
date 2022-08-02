@@ -128,6 +128,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
                                     text = when {
                                         uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
                                         uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
+                                        uploadStatus == UploadResult.SafetyNetFailure -> stringResource(id = R.string.safetynet_failed)
                                         else -> ""
                                     }
                                 )
@@ -136,7 +137,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
                     }
 
                     AnimatedVisibility(
-                        visible = uploadStatus?.e != null || uploadStatus == UploadResult.DuplicateData,
+                        visible = uploadStatus?.e != null || uploadStatus is UploadResult.ErrorResult,
                         modifier = Modifier.align(Alignment.End)
                     ) {
                         Column {

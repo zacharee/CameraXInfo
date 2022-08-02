@@ -27,9 +27,14 @@ import java.util.*
 sealed class UploadResult(open val e: Exception?) {
     object Uploading : UploadResult(null)
     object Success : UploadResult(null)
-    object DuplicateData : UploadResult(null)
-    data class SignInFailure(override val e: Exception?) : UploadResult(e)
-    data class UploadFailure(override val e: Exception?) : UploadResult(e)
+
+    object DuplicateData : ErrorResult(null)
+    object SafetyNetFailure : ErrorResult(null)
+
+    data class SignInFailure(override val e: Exception?) : ErrorResult(e)
+    data class UploadFailure(override val e: Exception?) : ErrorResult(e)
+
+    sealed class ErrorResult(e: Exception?) : UploadResult(e)
 }
 
 suspend fun signInIfNeeded(): Exception? {
@@ -50,6 +55,10 @@ suspend fun signInIfNeeded(): Exception? {
 }
 
 suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
+    if (!context.verifySafetyNet()) {
+        return UploadResult.SafetyNetFailure
+    }
+
     val signInResult = try {
         signInIfNeeded()
     } catch (e: Exception) {
