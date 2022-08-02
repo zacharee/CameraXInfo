@@ -81,27 +81,40 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
 
     if (uploadStatus != null) {
         AlertDialog(
+            modifier = Modifier.wrapContentHeight(),
             onDismissRequest = { uploadStatus = null },
-            confirmButton = { if (uploadStatus?.e != null) Text(text = stringResource(id = R.string.ok)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { uploadStatus = null },
+                    enabled = uploadStatus?.e != null || uploadStatus == UploadResult.DuplicateData
+                ) {
+                    Text(text = stringResource(id = R.string.ok))
+                }
+            },
             properties = DialogProperties(
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false
             ),
-            title = { Text(text = stringResource(id = R.string.uploading)) },
+            title = {
+                Text(text = stringResource(id = R.string.uploading))
+            },
             text = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
+                        .wrapContentHeight()
                 ) {
                     if (uploadStatus == UploadResult.Uploading) {
                         CircularProgressIndicator()
                     }
 
-                    uploadStatus?.e?.let { e ->
-                        Text(
-                            text = stringResource(id = R.string.error, e.message.toString())
-                        )
-                    }
+                    Text(
+                        text = when {
+                            uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
+                            uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
+                            else -> ""
+                        }
+                    )
                 }
             }
         )

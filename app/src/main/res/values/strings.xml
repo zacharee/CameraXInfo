@@ -52,4 +52,5 @@
     <string name="logical_camera_format">Camera %s</string>
     <string name="camera_direction_format">%1$s, %2$sMP, %3$s˚</string>
     <string name="upload_desc">Upload your camera info to a central database anonymously.</string>
+    <string name="duplicate_data">Identical data has already been uploaded!</string>
 </resources>

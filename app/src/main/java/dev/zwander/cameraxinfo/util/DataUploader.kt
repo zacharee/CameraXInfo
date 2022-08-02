@@ -11,6 +11,7 @@ import androidx.camera.core.CameraInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.extensionModeToString
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
@@ -24,6 +25,7 @@ import java.util.*
 sealed class UploadResult(open val e: Exception?) {
     object Uploading : UploadResult(null)
     object Success : UploadResult(null)
+    object DuplicateData : UploadResult(null)
     data class SignInFailure(override val e: Exception?) : UploadResult(e)
     data class UploadFailure(override val e: Exception?) : UploadResult(e)
 }
@@ -52,22 +54,33 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         return UploadResult.SignInFailure(signInResult)
     }
 
-    val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
+    try {
+        val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
 
-    val firestore = Firebase.firestore
-    val collection = firestore
-        .collection("CameraData")
-        .document(Build.BRAND.uppercase())
-        .collection(Build.MODEL.uppercase())
-        .document(Build.VERSION.SDK_INT.toString())
-        .collection("CameraDataNode")
+        val firestore = Firebase.firestore
+        val collection = firestore
+            .collection("CameraData")
+            .document(Build.BRAND.uppercase())
+            .collection(Build.MODEL.uppercase())
+            .document(Build.VERSION.SDK_INT.toString())
+            .collection("CameraDataNode")
 
-    val task = collection.document(sdf.format(Date()))
-        .set("data" to buildInfo(context))
-    val result = task.await()
+        val existingDocs = collection.get().await().map { it.data.values.last().toString() }
+        val newInfo = buildInfo(context)
 
-    if (!task.isSuccessful) {
-        return UploadResult.UploadFailure(task.exception)
+        if (!BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
+            return UploadResult.DuplicateData
+        }
+
+        val task = collection.document(sdf.format(Date()))
+            .set("data" to newInfo)
+        task.await()
+
+        if (!task.isSuccessful) {
+            return UploadResult.UploadFailure(task.exception)
+        }
+    } catch (e: Exception) {
+        return UploadResult.UploadFailure(e)
     }
 
     return UploadResult.Success
