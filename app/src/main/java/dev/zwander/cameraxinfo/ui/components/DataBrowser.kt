@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
@@ -37,6 +38,7 @@ fun DataBrowser(
     val model = LocalDataModel.current
 
     val storage = Firebase.storage
+    val firestore = Firebase.firestore
 
     LaunchedEffect(key1 = lastRefreshTime) {
         if (model.currentReference == null) {

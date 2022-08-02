@@ -5,12 +5,13 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.SimpleDateFormat
 import android.os.Build
+import android.util.Log
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import dev.zwander.cameraxinfo.extensionModeToString
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
@@ -54,18 +55,38 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
 
     val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
 
-    val storage = Firebase.storage
-    val directory = storage.getReference("/CameraData/${Build.BRAND.uppercase()}/${Build.MODEL.uppercase()}/${Build.VERSION.SDK_INT}")
-    val file = directory.child("${sdf.format(Date())}.json")
+    val firestore = Firebase.firestore
+    val collection = firestore
+        .collection("CameraData")
+        .document(Build.BRAND.uppercase())
+        .collection(Build.MODEL.uppercase())
+        .document(Build.VERSION.SDK_INT.toString())
+        .collection("CameraDataNode")
 
-    val content = buildInfo(context)
+    val task = collection.document(sdf.format(Date()))
+        .set("data" to buildInfo(context))
+    val result = task.await()
 
-    val uploadTask = file.putBytes(content.toByteArray())
-    val uploadResult = uploadTask.await()
-
-    if (!uploadTask.isSuccessful) {
-        return UploadResult.UploadFailure(uploadResult.error)
+    firestore.collectionGroup("CameraDataNode").get().await().forEach { doc ->
+        Log.e("CameraXInfo", doc.reference.path)
     }
+
+    if (!task.isSuccessful) {
+        return UploadResult.UploadFailure(task.exception)
+    }
+
+//    val storage = Firebase.storage
+//    val directory = storage.getReference("/CameraData/${Build.BRAND.uppercase()}/${Build.MODEL.uppercase()}/${Build.VERSION.SDK_INT}")
+//    val file = directory.child("${sdf.format(Date())}.json")
+//
+//    val content = buildInfo(context)
+//
+//    val uploadTask = file.putBytes(content.toByteArray())
+//    val uploadResult = uploadTask.await()
+//
+//    if (!uploadTask.isSuccessful) {
+//        return UploadResult.UploadFailure(uploadResult.error)
+//    }
 
     return UploadResult.Success
 }

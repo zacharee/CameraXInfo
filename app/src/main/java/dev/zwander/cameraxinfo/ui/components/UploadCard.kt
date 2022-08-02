@@ -22,6 +22,7 @@ import com.android.internal.R.attr.visible
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
@@ -111,7 +112,7 @@ fun UploadCard(lastRefreshTime: Long, modifier: Modifier = Modifier) {
                 onClick = {
                     val currentTime = System.currentTimeMillis()
 
-                    if ((context.latestUploadTime - currentTime).absoluteValue < 30_000) {
+                    if (!BuildConfig.DEBUG && (context.latestUploadTime - currentTime).absoluteValue < 30_000) {
                         Toast.makeText(context, R.string.rate_limited, Toast.LENGTH_SHORT).show()
                     } else {
                         context.latestUploadTime = currentTime
