@@ -25,6 +25,7 @@ import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.data.createTreeFromPaths
+import dev.zwander.cameraxinfo.util.awaitCatchingError
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.tasks.await
@@ -45,7 +46,7 @@ class DataModel {
     suspend fun populatePath() = coroutineScope {
         val firestore = Firebase.firestore
 
-        currentPath = firestore.collectionGroup("CameraDataNode").get().await().createTreeFromPaths()
+        currentPath = firestore.collectionGroup("CameraDataNode").get().awaitCatchingError().createTreeFromPaths()
     }
 
     @SuppressLint("UnsafeOptInUsageError", "InlinedApi")

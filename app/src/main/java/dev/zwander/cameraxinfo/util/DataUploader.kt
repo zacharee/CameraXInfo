@@ -35,7 +35,7 @@ suspend fun signInIfNeeded(): Exception? {
 
     return if (auth.currentUser == null) {
         val task = auth.signInAnonymously()
-        task.await()
+        task.awaitCatchingError()
 
         if (task.isSuccessful) {
             null
@@ -48,7 +48,11 @@ suspend fun signInIfNeeded(): Exception? {
 }
 
 suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
-    val signInResult = signInIfNeeded()
+    val signInResult = try {
+        signInIfNeeded()
+    } catch (e: Exception) {
+        e
+    }
 
     if (signInResult != null) {
         return UploadResult.SignInFailure(signInResult)
@@ -65,7 +69,7 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
             .document(Build.VERSION.SDK_INT.toString())
             .collection("CameraDataNode")
 
-        val existingDocs = collection.get().await().map { it.data.values.last().toString() }
+        val existingDocs = collection.get().awaitCatchingError().map { it.data.values.last().toString() }
         val newInfo = buildInfo(context)
 
         if (!BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
@@ -74,7 +78,7 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
 
         val task = collection.document(sdf.format(Date()))
             .set("data" to newInfo)
-        task.await()
+        task.awaitCatchingError()
 
         if (!task.isSuccessful) {
             return UploadResult.UploadFailure(task.exception)

@@ -33,6 +33,7 @@ import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.util.UploadResult
+import dev.zwander.cameraxinfo.util.awaitCatchingError
 import dev.zwander.cameraxinfo.util.uploadToCloud
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,7 +56,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
         result?.let { uri ->
             scope.launch(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri).use { writer ->
-                    Firebase.firestore.collectionGroup("CameraDataNode").get().await()
+                    Firebase.firestore.collectionGroup("CameraDataNode").get().awaitCatchingError()
                         .createZipFile(context)
                         .inputStream().use { reader ->
                             reader.copyTo(writer)
