@@ -118,6 +118,7 @@ fun DataModel.buildInfo(context: Context): String {
     infoObject.put("device_sdk", Build.VERSION.SDK_INT)
     infoObject.put("device_release", Build.VERSION.RELEASE)
     infoObject.put("device_security", Build.VERSION.SECURITY_PATCH)
+    infoObject.put("build_fingerprint", Build.FINGERPRINT)
 
     infoObject.put(
         "arcore",
