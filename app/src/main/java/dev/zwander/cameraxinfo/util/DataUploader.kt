@@ -55,8 +55,12 @@ suspend fun signInIfNeeded(): Exception? {
 }
 
 suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
-    if (!context.verifySafetyNet()) {
-        return UploadResult.SafetyNetFailure
+    try {
+        if (!context.verifySafetyNet()) {
+            return UploadResult.SafetyNetFailure
+        }
+    } catch (e: Exception) {
+        return UploadResult.UploadFailure(e)
     }
 
     val signInResult = try {
