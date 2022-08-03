@@ -93,7 +93,7 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
 
         val newInfo = buildInfo(context)
 
-        if (BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
+        if (!BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
             return UploadResult.DuplicateData
         }
 
