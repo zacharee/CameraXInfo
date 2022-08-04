@@ -55,4 +55,6 @@
     <string name="upload_desc">Upload your camera info to a central database anonymously.</string>
     <string name="duplicate_data">Identical data has already been uploaded!</string>
     <string name="safetynet_failed">Unable to verify SafetyNet status!</string>
+    <string name="sort_by_name">Sort by name</string>
+    <string name="sort_by_count">Sort by count</string>
 </resources>
