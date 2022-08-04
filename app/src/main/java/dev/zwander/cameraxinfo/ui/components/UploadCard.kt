@@ -1,5 +1,6 @@
 package dev.zwander.cameraxinfo.ui.components
 
+import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,8 +64,14 @@ fun UploadCard(modifier: Modifier = Modifier) {
                     val handle = group.addSnapshotListener { _, _ ->  }
                     group.get().awaitCatchingError()
                         .createZipFile(context)
-                        .inputStream().use { reader ->
-                            reader.copyTo(writer)
+                        .apply {
+                            try {
+                                inputStream().use { reader ->
+                                    reader.copyTo(writer)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("CameraXInfo", "Error copying file", e)
+                            }
                         }
                     handle.remove()
                 }
