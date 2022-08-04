@@ -20,7 +20,6 @@ import dev.zwander.cameraxinfo.model.LocalDataModel
 private const val COLUMN_WEIGHT = 0.5f
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ARCoreCard(modifier: Modifier = Modifier) {
     val model = LocalDataModel.current

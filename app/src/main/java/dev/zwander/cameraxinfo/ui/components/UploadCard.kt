@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.android.internal.R.attr.visible
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
@@ -37,6 +38,7 @@ import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.util.UploadResult
 import dev.zwander.cameraxinfo.util.awaitCatchingError
+import dev.zwander.cameraxinfo.util.signInIfNeeded
 import dev.zwander.cameraxinfo.util.uploadToCloud
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -215,7 +217,16 @@ fun UploadCard(modifier: Modifier = Modifier) {
                         Toast.makeText(context, R.string.rate_limited, Toast.LENGTH_SHORT).show()
                     } else {
                         context.latestDownloadTime = currentTime
-                        saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
+
+                        scope.launch(Dispatchers.IO) {
+                            val signInResult = signInIfNeeded()
+
+                            if (signInResult != null) {
+                                Toast.makeText(context, context.resources.getString(R.string.error, signInResult.message), Toast.LENGTH_SHORT).show()
+                            } else {
+                                saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
+                            }
+                        }
                     }
                 }
             ) {

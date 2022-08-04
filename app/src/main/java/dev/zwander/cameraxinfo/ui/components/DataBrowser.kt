@@ -10,10 +10,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.android.internal.R.string.loading
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.model.LocalDataModel
@@ -26,11 +26,12 @@ fun DataBrowser(
     modifier: Modifier = Modifier
 ) {
     val model = LocalDataModel.current
+    val context = LocalContext.current
 
     LaunchedEffect(key1 = null) {
         if (model.currentPath == null) {
             withContext(Dispatchers.IO) {
-                model.populatePath()
+                model.populatePath(context)
             }
         }
     }

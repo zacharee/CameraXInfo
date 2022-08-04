@@ -26,6 +26,7 @@ import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import dev.zwander.cameraxinfo.util.awaitCatchingError
+import dev.zwander.cameraxinfo.util.signInIfNeeded
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
 
@@ -42,10 +43,19 @@ class DataModel {
 
     var currentPath by mutableStateOf<Node?>(null)
 
-    suspend fun populatePath() = coroutineScope {
+    suspend fun populatePath(context: Context) = coroutineScope {
         val firestore = Firebase.firestore
 
         currentPath = null
+
+        val signInResult = signInIfNeeded()
+
+        if (signInResult != null) {
+            currentPath = Node(
+                name = context.resources.getString(R.string.error, signInResult.message)
+            )
+            return@coroutineScope
+        }
 
         val group = firestore.collectionGroup("CameraDataNode")
         val g = group.addSnapshotListener { _, _ -> }
@@ -65,7 +75,7 @@ class DataModel {
 
         if (currentPath != null) {
             withContext(Dispatchers.IO) {
-                populatePath()
+                populatePath(context)
             }
         }
 
