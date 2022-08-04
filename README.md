@@ -1,7 +1,7 @@
 # CameraX Info
 A simple app to list supported Camera2/CameraX extensions and other camera capabilities.
 
-Downloads are available on the [Releases page](/releases).
+Downloads are available on the [Releases page](https://github.com/zacharee/CameraXInfo/releases).
 
 # Database
 CameraX Info also has an online database feature, where users can anonymously upload, browse, and download camera support data for different devices and Android versions.
