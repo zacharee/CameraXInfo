@@ -121,13 +121,14 @@ fun JSONObject.insertCameraInfo(info: CameraInfo, context: Context) {
 fun JSONObject.insertCameraInfo(info: CameraCharacteristics, context: Context) {
     put(
         "lens_facing",
-        info.get(CameraCharacteristics.LENS_FACING).lensFacingToString(context)
+        info.get(CameraCharacteristics.LENS_FACING).lensFacingToString(context, false)
     )
     put(
         "fov",
         getFOV(
             info.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.minOf { it } ?: 0f,
-            info.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: SizeF(0f, 0f)
+            info.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) ?: SizeF(0f, 0f),
+            true
         )
     )
     put(
@@ -181,7 +182,7 @@ fun DataModel.buildInfo(context: Context): String {
                     JSONObject().apply {
                         (extensions[info2.cameraId] ?: defaultExtensionState).forEach { (t, u) ->
                             put(
-                                t.extensionModeToString(context),
+                                t.extensionModeToString(context, false),
                                 JSONObject().apply {
                                     put("camera2", u.camera2Availability)
                                     put("camerax", u.cameraXAvailability)
