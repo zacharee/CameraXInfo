@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UploadCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -58,11 +58,14 @@ fun UploadCard(modifier: Modifier = Modifier) {
         result?.let { uri ->
             scope.launch(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri).use { writer ->
-                    Firebase.firestore.collectionGroup("CameraDataNode").get().awaitCatchingError()
+                    val group = Firebase.firestore.collectionGroup("CameraDataNode")
+                    val handle = group.addSnapshotListener { _, _ ->  }
+                    group.get().awaitCatchingError()
                         .createZipFile(context)
                         .inputStream().use { reader ->
                             reader.copyTo(writer)
                         }
+                    handle.remove()
                 }
             }
         }
