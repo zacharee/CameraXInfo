@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -16,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -224,6 +226,8 @@ fun UploadCard(modifier: Modifier = Modifier) {
             Box(
                 contentAlignment = Alignment.Center
             ) {
+                val animatedAlpha by animateFloatAsState(targetValue = if (isDownloading) 0f else 1f)
+
                 Button(
                     onClick = {
                         val currentTime = System.currentTimeMillis()
@@ -244,7 +248,8 @@ fun UploadCard(modifier: Modifier = Modifier) {
                             }
                         }
                     },
-                    enabled = !isDownloading
+                    enabled = !isDownloading,
+                    modifier = Modifier.alpha(animatedAlpha)
                 ) {
                     Text(text = stringResource(id = R.string.download))
                 }
