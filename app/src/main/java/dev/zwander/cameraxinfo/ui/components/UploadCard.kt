@@ -52,6 +52,10 @@ fun UploadCard(modifier: Modifier = Modifier) {
     val model = LocalDataModel.current
     val scope = rememberCoroutineScope()
 
+    var isDownloading by remember {
+        mutableStateOf(false)
+    }
+
     val saver = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(
             MimeTypeMap.getSingleton().getMimeTypeFromExtension("zip")
@@ -59,6 +63,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
     ) { result ->
         result?.let { uri ->
             scope.launch(Dispatchers.IO) {
+                isDownloading = true
                 context.contentResolver.openOutputStream(uri).use { writer ->
                     val group = Firebase.firestore.collectionGroup("CameraDataNode")
                     val handle = group.addSnapshotListener { _, _ ->  }
@@ -75,6 +80,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
                         }
                     handle.remove()
                 }
+                isDownloading = false
             }
         }
     }
@@ -215,28 +221,37 @@ fun UploadCard(modifier: Modifier = Modifier) {
                 Text(text = stringResource(id = R.string.upload))
             }
 
-            Button(
-                onClick = {
-                    val currentTime = System.currentTimeMillis()
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = {
+                        val currentTime = System.currentTimeMillis()
 
-                    if (!BuildConfig.DEBUG && (context.latestDownloadTime - currentTime).absoluteValue < 30_000) {
-                        Toast.makeText(context, R.string.rate_limited, Toast.LENGTH_SHORT).show()
-                    } else {
-                        context.latestDownloadTime = currentTime
+                        if (!BuildConfig.DEBUG && (context.latestDownloadTime - currentTime).absoluteValue < 30_000) {
+                            Toast.makeText(context, R.string.rate_limited, Toast.LENGTH_SHORT).show()
+                        } else {
+                            context.latestDownloadTime = currentTime
 
-                        scope.launch(Dispatchers.IO) {
-                            val signInResult = signInIfNeeded()
+                            scope.launch(Dispatchers.IO) {
+                                val signInResult = signInIfNeeded()
 
-                            if (signInResult != null) {
-                                Toast.makeText(context, context.resources.getString(R.string.error, signInResult.message), Toast.LENGTH_SHORT).show()
-                            } else {
-                                saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
+                                if (signInResult != null) {
+                                    Toast.makeText(context, context.resources.getString(R.string.error, signInResult.message), Toast.LENGTH_SHORT).show()
+                                } else {
+                                    saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
+                                }
                             }
                         }
-                    }
+                    },
+                    enabled = !isDownloading
+                ) {
+                    Text(text = stringResource(id = R.string.download))
                 }
-            ) {
-                Text(text = stringResource(id = R.string.download))
+
+                androidx.compose.animation.AnimatedVisibility(visible = isDownloading) {
+                    CircularProgressIndicator()
+                }
             }
 
             Button(
