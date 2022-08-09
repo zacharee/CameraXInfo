@@ -8,13 +8,6 @@ import android.os.Build
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.extensionModeToString
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
@@ -37,23 +30,6 @@ sealed class UploadResult(open val e: Exception?) {
     sealed class ErrorResult(e: Exception?) : UploadResult(e)
 }
 
-suspend fun signInIfNeeded(): Exception? {
-    val auth = FirebaseAuth.getInstance()
-
-    return if (auth.currentUser == null) {
-        val task = auth.signInAnonymously()
-        task.awaitCatchingError()
-
-        if (task.isSuccessful) {
-            null
-        } else {
-            task.exception
-        }
-    } else {
-        null
-    }
-}
-
 suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
     try {
         if (!context.verifySafetyNet()) {
@@ -63,48 +39,24 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         return UploadResult.UploadFailure(e)
     }
 
-    val signInResult = try {
-        signInIfNeeded()
+    try {
+        BackendlessUtils.ensureLogin()
     } catch (e: Exception) {
-        e
-    }
-
-    if (signInResult != null) {
-        return UploadResult.SignInFailure(signInResult)
+        return UploadResult.SignInFailure(e)
     }
 
     try {
         val sdf = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault())
 
-        val querySnapshotListener = EventListener<QuerySnapshot> { _, _ -> }
-        val documentSnapshotListener = EventListener<DocumentSnapshot> { _, _ -> }
-
-        val firestore = Firebase.firestore
-        val collection = firestore
-            .collection("CameraData")
-            .document(Build.BRAND.uppercase())
-            .collection(Build.MODEL.uppercase())
-            .document(Build.VERSION.SDK_INT.toString())
-            .collection("CameraDataNode")
-
-        val c = collection.addSnapshotListener(querySnapshotListener)
-        val existingDocs = collection.get().awaitCatchingError().map { it.data.values.last().toString() }
-        c.remove()
+        val path = "/CameraData/${Build.BRAND.uppercase()}/${Build.MODEL.uppercase()}/${Build.VERSION.SDK_INT}/"
+        val file = "${sdf.format(Date())}.json"
 
         val newInfo = buildInfo(context)
 
-        if (!BuildConfig.DEBUG && existingDocs.contains(newInfo)) {
-            return UploadResult.DuplicateData
-        }
-
-        val doc = collection.document(sdf.format(Date()))
-        val d = doc.addSnapshotListener(documentSnapshotListener)
-        val task = doc.set("data" to newInfo)
-        task.awaitCatchingError()
-        d.remove()
-
-        if (!task.isSuccessful) {
-            return UploadResult.UploadFailure(task.exception)
+        try {
+            BackendlessUtils.uploadFile(path, file, newInfo)
+        } catch (e: Exception) {
+            return UploadResult.UploadFailure(e)
         }
     } catch (e: Exception) {
         return UploadResult.UploadFailure(e)

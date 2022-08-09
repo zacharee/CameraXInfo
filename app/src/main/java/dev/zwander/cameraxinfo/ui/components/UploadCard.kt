@@ -38,10 +38,7 @@ import dev.zwander.cameraxinfo.data.createZipFile
 import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import dev.zwander.cameraxinfo.util.UploadResult
-import dev.zwander.cameraxinfo.util.awaitCatchingError
-import dev.zwander.cameraxinfo.util.signInIfNeeded
-import dev.zwander.cameraxinfo.util.uploadToCloud
+import dev.zwander.cameraxinfo.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -238,13 +235,13 @@ fun UploadCard(modifier: Modifier = Modifier) {
                             context.latestDownloadTime = currentTime
 
                             scope.launch(Dispatchers.IO) {
-                                val signInResult = signInIfNeeded()
-
-                                if (signInResult != null) {
+                                try {
+                                    BackendlessUtils.ensureLogin()
+                                } catch (e: Exception) {
                                     Toast.makeText(context, context.resources.getString(R.string.error, signInResult.message), Toast.LENGTH_SHORT).show()
-                                } else {
-                                    saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
                                 }
+
+                                saver.launch("CameraXData_${System.currentTimeMillis()}.zip")
                             }
                         }
                     },

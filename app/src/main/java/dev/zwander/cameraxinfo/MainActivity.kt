@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.backendless.Backendless
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.firebase.appcheck.FirebaseAppCheck
@@ -23,6 +24,7 @@ import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.ui.components.*
 import dev.zwander.cameraxinfo.ui.theme.CameraXInfoTheme
+import dev.zwander.cameraxinfo.util.BackendlessUtils
 
 class MainActivity : ComponentActivity() {
     private val permissionsRequester =
@@ -43,6 +45,8 @@ class MainActivity : ComponentActivity() {
         firebaseAppCheck.installAppCheckProviderFactory(
             SafetyNetAppCheckProviderFactory.getInstance()
         )
+
+        BackendlessUtils.setup()
 
         if (checkCallingOrSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissionsRequester.launch(android.Manifest.permission.CAMERA)

@@ -19,10 +19,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.backendless.files.FileInfo
 import dev.zwander.cameraxinfo.R
-import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.model.LocalDataModel
+import dev.zwander.cameraxinfo.util.BackendlessUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 enum class SortMode {
@@ -30,8 +32,8 @@ enum class SortMode {
     COUNT
 }
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalFoundationApi::class)
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 @Composable
 fun DataBrowser(
     onDismissRequest: () -> Unit,
@@ -40,6 +42,7 @@ fun DataBrowser(
     val model = LocalDataModel.current
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     var sortMode by rememberSaveable {
         mutableStateOf(SortMode.NAME)
@@ -68,12 +71,15 @@ fun DataBrowser(
         ) {
             IconButton(
                 onClick = {
-                    model.currentPath?.parent?.apply {
-                        when {
-                            this() == null -> onDismissRequest()
-                            else -> model.currentPath = this()
+                    when (val parent = model.currentPath?.url?.split("/")?.dropLast(1)) {
+                        null -> onDismissRequest()
+                        else -> model.currentPath = FileInfo().apply {
+                            this.name = parent.last()
+                            this.url = parent.dropLast(1).joinToString("/", "/")
                         }
                     }
+
+                    model.currentFile = null
                 }
             ) {
                 Icon(
@@ -82,7 +88,7 @@ fun DataBrowser(
                 )
             }
 
-            AnimatedVisibility(visible = model.currentPath?.run { this.content == null && this.children.none { it.content != null } } == true) {
+            AnimatedVisibility(visible = model.currentFile != null) {
                 IconButton(
                     onClick = {
                         sortMode = if (sortMode == SortMode.NAME) SortMode.COUNT else SortMode.NAME
@@ -112,7 +118,7 @@ fun DataBrowser(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = model.currentPath?.absolutePath ?: stringResource(id = R.string.loading)
+                    text = model.currentPath?.name ?: stringResource(id = R.string.loading)
                 )
             }
         }
@@ -134,15 +140,21 @@ fun DataBrowser(
                 }
             }
 
-            if (model.currentPath?.content == null) {
-                items(items = model.currentPath?.children?.run {
+            if (model.currentPath == null) {
+                items(items = model.fileInfo.run {
                     when (sortMode) {
                         SortMode.NAME -> sortedBy { it.name }
-                        SortMode.COUNT -> sortedBy { -it.children.size }
+                        SortMode.COUNT -> sortedBy { -it.size }
                     }
-                } ?: listOf(), key = { it.absolutePath }) {
+                }, key = { it.url }) {
                     it.StorageListItem(Modifier.animateItemPlacement()) {
-                        model.currentPath = it
+                        if (model.currentPath?.name?.endsWith(".json") == true) {
+                            scope.launch {
+                                model.currentFile = BackendlessUtils.getContent(model.currentPath!!)
+                            }
+                        } else {
+                            model.currentPath = it
+                        }
                     }
                 }
             } else {
@@ -154,7 +166,7 @@ fun DataBrowser(
                     ) {
                         SelectionContainer {
                             Text(
-                                text = model.currentPath?.content ?: ""
+                                text = model.currentFile ?: ""
                             )
                         }
                     }
@@ -167,7 +179,7 @@ fun DataBrowser(
 @Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Node.StorageListItem(modifier: Modifier = Modifier, onClick: () -> Unit) {
+private fun FileInfo.StorageListItem(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = modifier
@@ -185,9 +197,9 @@ private fun Node.StorageListItem(modifier: Modifier = Modifier, onClick: () -> U
 
             Spacer(Modifier.weight(1f))
 
-            if (children.size > 0 && content == null) {
+            if (size > 0) {
                 Text(
-                    text = "(${children.size})"
+                    text = "(${size})"
                 )
             }
         }

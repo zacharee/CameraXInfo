@@ -14,19 +14,15 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.compose.runtime.*
+import com.backendless.files.FileInfo
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.awaitAvailability
 import dev.zwander.cameraxinfo.data.CameraInfoHolder
 import dev.zwander.cameraxinfo.data.ExtensionAvailability
 import dev.zwander.cameraxinfo.R
-import dev.zwander.cameraxinfo.data.Node
-import dev.zwander.cameraxinfo.data.createTreeFromPaths
-import dev.zwander.cameraxinfo.util.awaitCatchingError
-import dev.zwander.cameraxinfo.util.signInIfNeeded
+import dev.zwander.cameraxinfo.util.BackendlessUtils
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
 
@@ -41,32 +37,27 @@ class DataModel {
     var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
     var depthStatus by mutableStateOf<Boolean?>(null)
 
-    var currentPath by mutableStateOf<Node?>(null)
+    val fileInfo = mutableStateListOf<FileInfo>()
+    var currentPath by mutableStateOf<FileInfo?>(null)
+    var currentFile by mutableStateOf<String?>(null)
 
     suspend fun populatePath(context: Context) = coroutineScope {
-        val firestore = Firebase.firestore
+        if (currentFile == null) {
+            fileInfo.clear()
 
-        currentPath = null
-
-        val signInResult = signInIfNeeded()
-
-        if (signInResult != null) {
-            currentPath = Node(
-                name = context.resources.getString(R.string.error, signInResult.message)
-            )
-            return@coroutineScope
+            try {
+                if (BackendlessUtils.ensureLogin()) {
+                    fileInfo.addAll(BackendlessUtils.listDirectory(currentPath?.url ?: "/"))
+                }
+                Unit
+            } catch (e: Exception) {
+                fileInfo.add(
+                    FileInfo().apply {
+                        name = context.resources.getString(R.string.error, e.message)
+                    }
+                )
+            }
         }
-
-        val group = firestore.collectionGroup("CameraDataNode")
-        val g = group.addSnapshotListener { _, _ -> }
-
-        currentPath = try {
-            group.get().awaitCatchingError().createTreeFromPaths()
-        } catch (e: Exception) {
-            Log.e("CameraXInfo", "Error getting data", e)
-            null
-        }
-        g.remove()
     }
 
     @SuppressLint("UnsafeOptInUsageError", "InlinedApi")
