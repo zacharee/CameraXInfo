@@ -125,7 +125,7 @@ class DataModel {
                         ExtensionMode.BOKEH to CameraExtensionCharacteristics.EXTENSION_BOKEH,
                         ExtensionMode.HDR to CameraExtensionCharacteristics.EXTENSION_HDR,
                         ExtensionMode.NIGHT to CameraExtensionCharacteristics.EXTENSION_NIGHT,
-                        ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_BEAUTY
+                        ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_FACE_RETOUCH
                     ).map { (cameraXExtension, camera2Extension) ->
                         cameraXExtension to ExtensionAvailability(
                             extension = cameraXExtension,

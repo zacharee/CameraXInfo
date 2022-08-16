@@ -60,13 +60,13 @@ fun UploadCard(modifier: Modifier = Modifier) {
 
     val saver = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(
-            MimeTypeMap.getSingleton().getMimeTypeFromExtension("zip")
+            MimeTypeMap.getSingleton().getMimeTypeFromExtension("zip") ?: "*/*"
         )
     ) { result ->
         result?.let { uri ->
             scope.launch(Dispatchers.IO) {
                 isDownloading = true
-                context.contentResolver.openOutputStream(uri).use { writer ->
+                context.contentResolver.openOutputStream(uri)?.use { writer ->
                     val group = Firebase.firestore.collectionGroup("CameraDataNode")
                     val handle = group.addSnapshotListener { _, _ ->  }
                     group.get().awaitCatchingError()

@@ -1,6 +1,7 @@
 package dev.zwander.cameraxinfo.ui.components
 
 import android.hardware.camera2.CameraCharacteristics
+import android.util.SizeF
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
@@ -21,7 +22,6 @@ import dev.zwander.cameraxinfo.getFOV
 private const val COLUMN_WEIGHT = 0.5f
 
 @Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhysicalSensors(physicalSensors: Map<String, CameraCharacteristics>) {
     Card(
@@ -93,8 +93,8 @@ fun PhysicalSensors(physicalSensors: Map<String, CameraCharacteristics>) {
                         text = stringResource(
                             id = R.string.deg_format,
                             getFOV(
-                                chars[CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS].minOf { it },
-                                chars[CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE]
+                                chars[CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS]?.minOf { it } ?: 0f,
+                                chars[CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE] ?: SizeF(0f, 0f)
                             )
                         ),
                         modifier = Modifier.weight(COLUMN_WEIGHT),
