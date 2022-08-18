@@ -8,6 +8,11 @@ CameraX Info also has an online database feature, where users can anonymously up
 
 This database relies on Firebase Firestore as the backend for storing device data.
 
+# Privacy
+CameraX Info uses Firebase Crashlytics and Firebase Firestore. Crashlytics is used to collect crash logs and Firestore is used for storing uploaded camera data.
+
+No personal data is collected and your camera data isn't uploaded unless you upload it yourself.
+
 ## Data
 
 Data is uploaded as JSON, with a form similar to:
