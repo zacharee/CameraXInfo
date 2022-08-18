@@ -75,7 +75,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-flowlayout:0.24.13-rc"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
     implementation 'com.google.android.material:material:1.7.0-beta01'
-    implementation 'com.google.ar:core:1.32.0'
+    implementation 'com.google.ar:core:1.33.0'
     implementation 'com.google.code.gson:gson:2.9.0'
 
     implementation platform('com.google.firebase:firebase-bom:30.3.1')
