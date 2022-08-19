@@ -96,6 +96,14 @@ fun InfoCard(refreshTime: Long, modifier: Modifier = Modifier) {
                 )
             }
 
+            item(key = "GitHub") {
+                LinkIconButton(
+                    link = "https://github.com/zacharee/CameraXInfo",
+                    icon = painterResource(id = R.drawable.github),
+                    contentDescription = stringResource(id = R.string.github)
+                )
+            }
+
             item(key = "Patreon") {
                 LinkIconButton(
                     link = "https://www.patreon.com/zacharywander",
@@ -123,8 +131,8 @@ fun InfoCard(refreshTime: Long, modifier: Modifier = Modifier) {
                 Crossfade(
                     targetState = supporters.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (it) {
+                ) { hasSupporters ->
+                    if (hasSupporters) {
                         LazyColumn(
                             modifier = Modifier
                                 .heightIn(max = 300.dp)
