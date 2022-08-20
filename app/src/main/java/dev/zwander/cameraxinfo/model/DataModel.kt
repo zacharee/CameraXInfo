@@ -201,7 +201,7 @@ class DataModel {
         arCoreStatus = try {
             Session(context).close()
             status
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e("CameraXInfo", "Error opening session", e)
             ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         }
