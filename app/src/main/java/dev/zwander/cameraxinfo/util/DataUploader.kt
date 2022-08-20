@@ -5,6 +5,7 @@ import android.content.Context
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.SimpleDateFormat
 import android.os.Build
+import android.os.Parcelable
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
@@ -20,18 +21,25 @@ import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.ui.components.defaultExtensionState
+import kotlinx.parcelize.Parcelize
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
-sealed class UploadResult(open val e: Exception?) {
+sealed class UploadResult(open val e: Exception?) : Parcelable {
+    @Parcelize
     object Uploading : UploadResult(null)
+    @Parcelize
     object Success : UploadResult(null)
 
+    @Parcelize
     object DuplicateData : ErrorResult(null)
+    @Parcelize
     object SafetyNetFailure : ErrorResult(null)
 
+    @Parcelize
     data class SignInFailure(override val e: Exception?) : ErrorResult(e)
+    @Parcelize
     data class UploadFailure(override val e: Exception?) : ErrorResult(e)
 
     sealed class ErrorResult(e: Exception?) : UploadResult(e)
