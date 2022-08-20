@@ -3,6 +3,8 @@ A simple app to list supported Camera2/CameraX extensions and other camera capab
 
 Downloads are available on the [Releases page](https://github.com/zacharee/CameraXInfo/releases).
 
+Alternatively, you can install from [Google Play](https://play.google.com/store/apps/details?id=dev.zwander.cameraxinfo).
+
 # Database
 CameraX Info also has an online database feature, where users can anonymously upload, browse, and download camera support data for different devices and Android versions.
 
@@ -14,7 +16,6 @@ CameraX Info uses Firebase Crashlytics and Firebase Firestore. Crashlytics is us
 No personal data is collected and your camera data isn't uploaded unless you upload it yourself.
 
 ## Data
-
 Data is uploaded as JSON, with a form similar to:
 
 ```
