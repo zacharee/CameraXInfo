@@ -58,7 +58,7 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
-    implementation 'androidx.compose.material3:material3:1.0.0-alpha16'
+    implementation 'androidx.compose.material3:material3:1.0.0-beta01'
 
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:${camerax_version}"
@@ -73,11 +73,11 @@ dependencies {
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
     implementation "net.lingala.zip4j:zip4j:2.11.1"
 
-    implementation "com.google.accompanist:accompanist-flowlayout:0.24.13-rc"
+    implementation "com.google.accompanist:accompanist-flowlayout:0.26.2-beta"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
-    implementation 'com.google.android.material:material:1.7.0-beta01'
+    implementation 'com.google.android.material:material:1.7.0-rc01'
     implementation 'com.google.ar:core:1.33.0'
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.9.1'
 
     implementation platform('com.google.firebase:firebase-bom:30.3.1')
     implementation 'com.google.firebase:firebase-crashlytics-ktx'

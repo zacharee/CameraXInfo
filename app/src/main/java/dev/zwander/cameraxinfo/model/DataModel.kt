@@ -189,7 +189,7 @@ class DataModel {
                     session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
                         session.close()
                     }
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     Log.e("CameraXInfo", "Error checking depth mode status", e)
                     false
                 }
