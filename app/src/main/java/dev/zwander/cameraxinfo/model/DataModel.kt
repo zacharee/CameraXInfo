@@ -29,6 +29,7 @@ import dev.zwander.cameraxinfo.util.awaitCatchingError
 import dev.zwander.cameraxinfo.util.signInIfNeeded
 import kotlinx.coroutines.*
 import kotlinx.coroutines.guava.await
+import kotlin.math.absoluteValue
 
 val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 
@@ -42,6 +43,8 @@ class DataModel {
     var depthStatus by mutableStateOf<Boolean?>(null)
 
     var currentPath by mutableStateOf<Node?>(null)
+
+    var previousPathPopulateTime = 0L
 
     suspend fun populatePath(context: Context) = coroutineScope {
         val firestore = Firebase.firestore
@@ -73,7 +76,10 @@ class DataModel {
     suspend fun populate(context: Context) = coroutineScope {
         val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
 
-        if (currentPath != null) {
+        val currentTime = System.currentTimeMillis()
+
+        if (currentPath != null && (currentTime - previousPathPopulateTime).absoluteValue > 30_000) {
+            previousPathPopulateTime = currentTime
             withContext(Dispatchers.IO) {
                 populatePath(context)
             }
