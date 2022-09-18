@@ -44,7 +44,7 @@ fun PhysicalSensors(physicalSensors: Map<String, CameraCharacteristics>) {
                 verticalAlignment = Alignment.Bottom
             ) {
                 Text(
-                    text = stringResource(id = R.string.physical),
+                    text = stringResource(id = R.string.id),
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )

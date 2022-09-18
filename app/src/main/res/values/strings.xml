@@ -31,7 +31,7 @@
     <string name="status">Status</string>
     <string name="quality">Quality</string>
     <string name="angle">Angle</string>
-    <string name="physical">Physical</string>
+    <string name="physical_sensors">Physical Sensors</string>
     <string name="upload">Upload</string>
     <string name="uploading">Uploading…</string>
     <string name="success">Success!</string>
@@ -43,6 +43,10 @@
     <string name="download">Download</string>
     <string name="rate_limited">Rate Limited!</string>
     <string name="loading">Loading</string>
+    <string name="logical_sensor">Logical Sensor</string>
+    <string name="id">ID</string>
+    <string name="extension_support">Extension Support</string>
+    <string name="info">Info</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>
@@ -61,6 +65,10 @@
     <string name="sort_by_count">Sort by count</string>
     <string name="error_downloading">Unable to download data: %s.\nPlease try again later.</string>
     <string name="error_browsing">Unable to fetch data: %s.\nPlease try again later.</string>
+    <string name="camera_direction_and_logical_format">%1$s, %2$s</string>
+    <string name="extension_support_desc">Note that extension support doesn\'t indicate basic API support. Many devices that have support for Camera2 do not support Camera2 extensions or CameraX extensions. The table below only displays what features your device manufacturer has exposed to third party apps. It does NOT represent the features built into the native camera app.</string>
+    <string name="logical_sensor_desc">The camera ID here may represent a logical sensor, rather than a physical one. If this is a logical camera, there will be a table below showing which physical sensors it represents.</string>
+    <string name="physical_sensors_desc">These are the physical sensors your device manufacturer has grouped into a single logical sensor. Depending on which third-party camera app you use, these may all be treated as a single camera, with the system automatically switching among them for different light and zoom levels.</string>
 
     <string name="front_facing_json" translatable="false">Front-Facing</string>
     <string name="rear_facing_json" translatable="false">Rear-Facing</string>

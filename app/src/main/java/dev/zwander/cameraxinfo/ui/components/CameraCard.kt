@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.zwander.cameraxinfo.R
@@ -36,26 +38,41 @@ val defaultExtensionState = mapOf(
 @Composable
 fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
     val model = LocalDataModel.current
+    val isLogical = model.physicalSensors[which2.cameraId]?.isNotEmpty() == true
 
     PaddedColumnCard(
         modifier = modifier
     ) {
-        Text(
-            text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
+        CenteredWithInfo(
+            centeredComponent = {
+                Text(
+                    text = stringResource(id = R.string.logical_camera_format, which2.cameraId),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 28.sp,
+                )
+            },
+            expandedInfoComponent = {
+                Text(
+                    text = stringResource(id = R.string.logical_sensor_desc),
+                    textAlign = TextAlign.Center
+                )
+            }
         )
 
         Divider(
             modifier = Modifier
-                .padding(top = 8.dp, bottom = 8.dp)
+                .padding(bottom = 8.dp)
                 .fillMaxWidth(0.33f)
         )
 
         Text(
-            text = if (model.physicalSensors[which2.cameraId]?.isNotEmpty() == true) {
-                which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
-                    .lensFacingToString(LocalContext.current)
+            text = if (isLogical) {
+                stringResource(
+                    id = R.string.camera_direction_and_logical_format,
+                    which2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)
+                        .lensFacingToString(LocalContext.current),
+                    stringResource(id = R.string.logical_sensor)
+                )
             } else {
                 stringResource(
                     id = R.string.camera_direction_format,
@@ -70,7 +87,9 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
                     )
                 )
             },
-            modifier = Modifier.padding(bottom = 8.dp).animateContentSize()
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .animateContentSize()
         )
 
         val supportedQualities = model.supportedQualities[which2.cameraId]
@@ -86,14 +105,48 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
         val physicalSensors = model.physicalSensors[which2.cameraId]
 
         AnimatedVisibility(visible = physicalSensors?.isNotEmpty() == true) {
-            Column {
-                Spacer(modifier = Modifier.size(8.dp))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.size(16.dp))
+
+                CenteredWithInfo(
+                    centeredComponent = {
+                        Text(
+                            text = stringResource(id = R.string.physical_sensors),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                    },
+                    expandedInfoComponent = {
+                        Text(
+                            text = stringResource(id = R.string.physical_sensors_desc),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                )
 
                 PhysicalSensors(physicalSensors = physicalSensors ?: mapOf())
             }
         }
 
         Spacer(Modifier.size(16.dp))
+
+        CenteredWithInfo(
+            centeredComponent = {
+                Text(
+                    text = stringResource(id = R.string.extension_support),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            },
+            expandedInfoComponent = {
+                Text(
+                    text = stringResource(id = R.string.extension_support_desc),
+                    textAlign = TextAlign.Center
+                )
+            }
+        )
 
         ExtensionsCard(extensionAvailability = model.extensions[which2.cameraId] ?: defaultExtensionState)
     }
