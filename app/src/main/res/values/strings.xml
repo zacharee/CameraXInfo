@@ -36,6 +36,7 @@
     <string name="uploading">Uploading…</string>
     <string name="success">Success!</string>
     <string name="error">Error: %s</string>
+    <string name="error_no_format">Error</string>
     <string name="ok">OK</string>
     <string name="browse">Browse</string>
     <string name="back">Back</string>
@@ -58,6 +59,8 @@
     <string name="safetynet_failed">Unable to verify SafetyNet status!</string>
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_count">Sort by count</string>
+    <string name="error_downloading">Unable to download data: %s.\nPlease try again later.</string>
+    <string name="error_browsing">Unable to fetch data: %s.\nPlease try again later.</string>
 
     <string name="front_facing_json" translatable="false">Front-Facing</string>
     <string name="rear_facing_json" translatable="false">Rear-Facing</string>

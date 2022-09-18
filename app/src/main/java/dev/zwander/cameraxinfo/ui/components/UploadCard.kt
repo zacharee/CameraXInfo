@@ -27,9 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.documentfile.provider.DocumentFile
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import dev.zwander.cameraxinfo.BuildConfig
@@ -69,17 +71,26 @@ fun UploadCard(modifier: Modifier = Modifier) {
                 context.contentResolver.openOutputStream(uri)?.use { writer ->
                     val group = Firebase.firestore.collectionGroup("CameraDataNode")
                     val handle = group.addSnapshotListener { _, _ ->  }
-                    group.get().awaitCatchingError()
-                        .createZipFile(context)
-                        .apply {
-                            try {
-                                inputStream().use { reader ->
-                                    reader.copyTo(writer)
+                    try {
+                        group.get().awaitCatchingError()
+                            .createZipFile(context)
+                            .inputStream().use { reader ->
+                                reader.copyTo(writer)
+                            }
+                    } catch (e: Exception) {
+                        launch(Dispatchers.Main) {
+                            MaterialAlertDialogBuilder(context).apply {
+                                setTitle(R.string.error_no_format)
+                                setMessage(context.resources.getString(R.string.error_downloading, e.localizedMessage))
+                                setPositiveButton(R.string.ok) { _, _ ->
+                                    try {
+                                        DocumentFile.fromSingleUri(context, uri)?.delete()
+                                    } catch (ignored: Exception) {}
                                 }
-                            } catch (e: Exception) {
-                                Log.e("CameraXInfo", "Error copying file", e)
+                                show()
                             }
                         }
+                    }
                     handle.remove()
                 }
                 isDownloading = false

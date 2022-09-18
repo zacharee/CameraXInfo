@@ -14,6 +14,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
 import androidx.camera.video.QualitySelector
 import androidx.compose.runtime.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
@@ -66,7 +67,14 @@ class DataModel {
         currentPath = try {
             group.get().awaitCatchingError().createTreeFromPaths()
         } catch (e: Exception) {
-            Log.e("CameraXInfo", "Error getting data", e)
+            launch(Dispatchers.Main) {
+                MaterialAlertDialogBuilder(context).apply {
+                    setTitle(R.string.error_no_format)
+                    setMessage(context.resources.getString(R.string.error_browsing, e.localizedMessage))
+                    setPositiveButton(R.string.ok, null)
+                    show()
+                }
+            }
             null
         }
         g.remove()
