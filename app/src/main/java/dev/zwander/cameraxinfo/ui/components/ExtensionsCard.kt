@@ -20,8 +20,6 @@ import dev.zwander.cameraxinfo.extensionModeToString
 
 private const val COLUMN_WEIGHT = 0.5f
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
     Card(

@@ -6,11 +6,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
@@ -39,6 +35,10 @@ fun CameraXInfoTheme(
         else -> lightColorScheme(
             primary = colorResource(id = R.color.colorPrimary),
             secondary = colorResource(id = R.color.colorSecondary)
+        )
+    }.run {
+        copy(
+            outlineVariant = this.contentColorFor(this.surface)
         )
     }
     val view = LocalView.current
