@@ -112,10 +112,18 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         d.remove()
 
         if (!task.isSuccessful) {
-            return UploadResult.UploadFailure(task.exception)
+            return UploadResult.UploadFailure(
+                task.exception?.let {
+                    IllegalStateException(it.message).apply {
+                        this.stackTrace = it.stackTrace
+                    }
+                }
+            )
         }
     } catch (e: Exception) {
-        return UploadResult.UploadFailure(e)
+        return UploadResult.UploadFailure(IllegalStateException(e.message).apply {
+            this.stackTrace = e.stackTrace
+        })
     }
 
     return UploadResult.Success
