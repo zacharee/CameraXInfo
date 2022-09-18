@@ -1,10 +1,16 @@
 package dev.zwander.cameraxinfo.ui.components
 
+import android.content.Context
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
@@ -12,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -69,33 +76,59 @@ fun SupportStateIcon(
             modifier = Modifier.heightIn(max = 24.dp)
         ) {
             when (it) {
-                SupportState.SUPPORTED -> Icon(
-                    painter = painterResource(id = R.drawable.check),
-                    tint = greenShifted,
-                    contentDescription = stringResource(id = R.string.supported)
-                )
-                SupportState.UNSUPPORTED -> Icon(
-                    painter = painterResource(id = R.drawable.close),
-                    tint = redShifted,
-                    contentDescription = stringResource(id = R.string.unsupported)
-                )
-                SupportState.OUTDATED -> Icon(
-                    painter = painterResource(id = R.drawable.update),
-                    tint = yellowShifted,
-                    contentDescription = stringResource(id = R.string.outdated)
-                )
-                SupportState.NOT_APPLICABLE -> Icon(
-                    painter = painterResource(id = R.drawable.circle),
-                    tint = contentColor,
-                    contentDescription = stringResource(id = R.string.not_applicable),
-                    modifier = Modifier.fillMaxWidth(0.15f)
-                )
-                SupportState.UNKNOWN -> Icon(
-                    painter = painterResource(id = R.drawable.question_mark),
-                    tint = yellowShifted,
-                    contentDescription = stringResource(id = R.string.unknown)
-                )
+                SupportState.SUPPORTED -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.check),
+                        tint = greenShifted,
+                        contentDescription = stringResource(id = R.string.supported),
+                        modifier = Modifier.toastClick(R.string.supported)
+                    )
+                }
+                SupportState.UNSUPPORTED -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.close),
+                        tint = redShifted,
+                        contentDescription = stringResource(id = R.string.unsupported),
+                        modifier = Modifier.toastClick(R.string.unsupported)
+                    )
+                }
+                SupportState.OUTDATED -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.update),
+                        tint = yellowShifted,
+                        contentDescription = stringResource(id = R.string.outdated),
+                        modifier = Modifier.toastClick(R.string.outdated)
+                    )
+                }
+                SupportState.NOT_APPLICABLE -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.circle),
+                        tint = contentColor,
+                        contentDescription = stringResource(id = R.string.not_applicable),
+                        modifier = Modifier.fillMaxWidth(0.15f).toastClick(R.string.not_applicable)
+                    )
+                }
+                SupportState.UNKNOWN -> {
+                    Icon(
+                        painter = painterResource(id = R.drawable.question_mark),
+                        tint = yellowShifted,
+                        contentDescription = stringResource(id = R.string.unknown),
+                        modifier = Modifier.toastClick(R.string.unknown)
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun Modifier.toastClick(@StringRes message: Int): Modifier {
+    val context = LocalContext.current
+
+    return clickable(
+        MutableInteractionSource(),
+        null
+    ) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
