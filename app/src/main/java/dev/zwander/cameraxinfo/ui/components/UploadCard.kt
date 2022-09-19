@@ -12,8 +12,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -26,16 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.documentfile.provider.DocumentFile
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.flowlayout.SizeMode
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.gson.reflect.TypeToken
 import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.createZipFile
@@ -47,8 +42,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalComposeUiApi::class)
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 @Composable
 fun UploadCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -57,6 +52,10 @@ fun UploadCard(modifier: Modifier = Modifier) {
 
     var isDownloading by remember {
         mutableStateOf(false)
+    }
+
+    var uploadErrorToShow by rememberSaveable(saver = UploadErrorSaver) {
+        mutableStateOf(null)
     }
 
     val saver = rememberLauncherForActivityResult(
@@ -78,16 +77,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
                             }
                     } catch (e: Exception) {
                         launch(Dispatchers.Main) {
-                            MaterialAlertDialogBuilder(context).apply {
-                                setTitle(R.string.error_no_format)
-                                setMessage(context.resources.getString(R.string.error_downloading, e.localizedMessage))
-                                setPositiveButton(R.string.ok) { _, _ ->
-                                    try {
-                                        DocumentFile.fromSingleUri(context, uri)?.delete()
-                                    } catch (ignored: Exception) {}
-                                }
-                                show()
-                            }
+                            uploadErrorToShow = e to uri
                         }
                     }
                     handle.remove()
@@ -97,24 +87,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
         }
     }
 
-    var uploadStatus by rememberSaveable(
-        saver = object : Saver<MutableState<UploadResult?>, String> {
-            override fun restore(value: String): MutableState<UploadResult?> {
-                return mutableStateOf(
-                    value.let {
-                        uploadResultGson.fromJson(
-                            it,
-                            object : TypeToken<UploadResult>() {}.type
-                        )
-                    }
-                )
-            }
-
-            override fun SaverScope.save(value: MutableState<UploadResult?>): String {
-                return value.value?.let { uploadResultGson.toJson(it) } ?: ""
-            }
-        }
-    ) {
+    var uploadStatus by rememberSaveable(saver = ResultSaver) {
         mutableStateOf(null)
     }
     var browsing by rememberSaveable {
@@ -128,79 +101,58 @@ fun UploadCard(modifier: Modifier = Modifier) {
         }
     }
 
+    if (uploadErrorToShow != null) {
+        CustomDialog(
+            onDismissRequest = { uploadErrorToShow = null },
+            title = stringResource(id = R.string.error_no_format),
+            content = {
+                Text(text = stringResource(id = R.string.error_downloading, uploadErrorToShow?.first?.localizedMessage ?: ""))
+            },
+            onConfirm = {
+                try {
+                    DocumentFile.fromSingleUri(context, uploadErrorToShow!!.second!!)?.delete()
+                } catch (ignored: Exception) {}
+            }
+        )
+    }
+
     if (uploadStatus != null) {
-        Dialog(
+        CustomDialog(
             onDismissRequest = { uploadStatus = null },
+            title = stringResource(id = R.string.uploading),
+            content = {
+                Crossfade(
+                    targetState = uploadStatus,
+                ) {
+                    when (it) {
+                        UploadResult.Uploading -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                        else -> {
+                            Text(
+                                text = when {
+                                    uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
+                                    uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
+                                    uploadStatus == UploadResult.SafetyNetFailure -> stringResource(id = R.string.safetynet_failed)
+                                    else -> ""
+                                }
+                            )
+                        }
+                    }
+                }
+            },
+            showConfirm = uploadStatus?.e != null || uploadStatus is UploadResult.ErrorResult,
             properties = DialogProperties(
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false,
                 usePlatformDefaultWidth = false
-            ),
-        ) {
-            Surface(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth(0.75f),
-                shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.Start,
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.uploading),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Spacer(Modifier.size(16.dp))
-
-                    Crossfade(
-                        targetState = uploadStatus,
-                    ) {
-                        when (it) {
-                            UploadResult.Uploading -> {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                            else -> {
-                                Text(
-                                    text = when {
-                                        uploadStatus?.e != null -> stringResource(id = R.string.error, uploadStatus?.e?.message.toString())
-                                        uploadStatus == UploadResult.DuplicateData -> stringResource(id = R.string.duplicate_data)
-                                        uploadStatus == UploadResult.SafetyNetFailure -> stringResource(id = R.string.safetynet_failed)
-                                        else -> ""
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    AnimatedVisibility(
-                        visible = uploadStatus?.e != null || uploadStatus is UploadResult.ErrorResult,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Column {
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            TextButton(
-                                onClick = { uploadStatus = null },
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.ok),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+            )
+        )
     }
 
     PaddedColumnCard(
