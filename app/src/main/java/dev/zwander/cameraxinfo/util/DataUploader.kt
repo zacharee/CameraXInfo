@@ -38,9 +38,9 @@ sealed class UploadResult(open val e: Exception?) : Parcelable {
     object SafetyNetFailure : ErrorResult(null)
 
     @Parcelize
-    data class SignInFailure(override val e: Exception?) : ErrorResult(e)
+    class SignInFailure(@Transient override val e: Exception?) : ErrorResult(e)
     @Parcelize
-    data class UploadFailure(override val e: Exception?) : ErrorResult(e)
+    class UploadFailure(@Transient override val e: Exception?) : ErrorResult(e)
 
     sealed class ErrorResult(e: Exception?) : UploadResult(e)
 }
@@ -112,18 +112,10 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         d.remove()
 
         if (!task.isSuccessful) {
-            return UploadResult.UploadFailure(
-                task.exception?.let {
-                    IllegalStateException(it.message).apply {
-                        this.stackTrace = it.stackTrace
-                    }
-                }
-            )
+            return UploadResult.UploadFailure(task.exception)
         }
     } catch (e: Exception) {
-        return UploadResult.UploadFailure(IllegalStateException(e.message).apply {
-            this.stackTrace = e.stackTrace
-        })
+        return UploadResult.UploadFailure(e)
     }
 
     return UploadResult.Success

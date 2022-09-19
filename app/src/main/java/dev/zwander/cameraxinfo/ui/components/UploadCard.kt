@@ -1,6 +1,5 @@
 package dev.zwander.cameraxinfo.ui.components
 
-import android.util.Log
 import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -13,6 +12,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -34,16 +35,14 @@ import com.google.accompanist.flowlayout.SizeMode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.gson.reflect.TypeToken
 import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.createZipFile
 import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import dev.zwander.cameraxinfo.util.UploadResult
-import dev.zwander.cameraxinfo.util.awaitCatchingError
-import dev.zwander.cameraxinfo.util.signInIfNeeded
-import dev.zwander.cameraxinfo.util.uploadToCloud
+import dev.zwander.cameraxinfo.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
@@ -98,8 +97,25 @@ fun UploadCard(modifier: Modifier = Modifier) {
         }
     }
 
-    var uploadStatus by rememberSaveable {
-        mutableStateOf<UploadResult?>(null)
+    var uploadStatus by rememberSaveable(
+        saver = object : Saver<MutableState<UploadResult?>, String> {
+            override fun restore(value: String): MutableState<UploadResult?> {
+                return mutableStateOf(
+                    value.let {
+                        uploadResultGson.fromJson(
+                            it,
+                            object : TypeToken<UploadResult>() {}.type
+                        )
+                    }
+                )
+            }
+
+            override fun SaverScope.save(value: MutableState<UploadResult?>): String {
+                return value.value?.let { uploadResultGson.toJson(it) } ?: ""
+            }
+        }
+    ) {
+        mutableStateOf(null)
     }
     var browsing by rememberSaveable {
         mutableStateOf(false)
