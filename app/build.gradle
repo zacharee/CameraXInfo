@@ -54,12 +54,12 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
     implementation 'androidx.preference:preference-ktx:1.2.0'
 
-    implementation 'androidx.activity:activity-compose:1.5.1'
+    implementation 'androidx.activity:activity-compose:1.6.1'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
-    implementation 'androidx.compose.material3:material3:1.0.0-beta02'
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha03"
+    implementation 'androidx.compose.material3:material3:1.1.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha04'
 
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:${camerax_version}"
@@ -74,18 +74,18 @@ dependencies {
     implementation 'com.github.zacharee:PatreonSupportersRetrieval:8436bbdbdc'
     implementation 'net.lingala.zip4j:zip4j:2.11.2'
 
-    implementation 'com.google.accompanist:accompanist-flowlayout:0.26.3-beta'
-    implementation 'com.google.accompanist:accompanist-swiperefresh:0.26.3-beta'
-    implementation 'com.google.android.material:material:1.8.0-alpha01'
-    implementation 'com.google.ar:core:1.33.0'
-    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'com.google.accompanist:accompanist-flowlayout:0.27.0'
+    implementation 'com.google.accompanist:accompanist-swiperefresh:0.27.0'
+    implementation 'com.google.android.material:material:1.8.0-alpha02'
+    implementation 'com.google.ar:core:1.34.0'
+    implementation 'com.google.code.gson:gson:2.10'
 
-    implementation platform('com.google.firebase:firebase-bom:30.5.0')
+    implementation platform('com.google.firebase:firebase-bom:31.0.1')
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
-    implementation 'com.google.firebase:firebase-appcheck-safetynet:16.0.2'
+    implementation 'com.google.firebase:firebase-appcheck-safetynet:16.1.0'
     implementation 'com.google.android.gms:play-services-safetynet:18.0.1'
 
     testImplementation 'junit:junit:4.13.2'
