@@ -45,7 +45,7 @@ class DataModel {
     var currentPath by mutableStateOf<Node?>(null)
     var pathLoadError by mutableStateOf<Exception?>(null)
 
-    var previousPathPopulateTime = 0L
+    private var previousPathPopulateTime = 0L
 
     suspend fun populatePath(context: Context) = coroutineScope {
         val firestore = Firebase.firestore
@@ -101,7 +101,7 @@ class DataModel {
                 camera2Info = Camera2CameraInfo.from(it)
             ).also { (info, info2) ->
                 @Suppress("DeferredResultUnused")
-                async {
+                async(Dispatchers.IO) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         val physicals = withContext(Dispatchers.IO) {
                             val logicalChars =
@@ -117,7 +117,7 @@ class DataModel {
                 }
 
                 @Suppress("DeferredResultUnused")
-                async {
+                async(Dispatchers.IO) {
                     val camera2Extensions =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             withContext(Dispatchers.IO) {
@@ -137,10 +137,17 @@ class DataModel {
                         cameraXExtension to ExtensionAvailability(
                             extension = cameraXExtension,
                             camera2Availability = camera2Extensions.contains(camera2Extension),
-                            cameraXAvailability = e.await().isExtensionAvailable(
-                                info.cameraSelector,
-                                cameraXExtension
-                            )
+                            cameraXAvailability = try {
+                                e.await().isExtensionAvailable(
+                                    info.cameraSelector,
+                                    cameraXExtension
+                                )
+                            } catch (e: IllegalStateException) {
+                                // There's a bug in the Pixel Android 14 DP2 CameraX vendor lib where
+                                // it uses the wrong extension constants when initializing extensions,
+                                // causing a crash when checking for extension availability.
+                                null
+                            }
                         )
                     }
 
@@ -148,7 +155,7 @@ class DataModel {
                 }
 
                 @Suppress("DeferredResultUnused")
-                async {
+                async(Dispatchers.IO) {
                     supportedQualities[info2.cameraId] =
                         QualitySelector.getSupportedQualities(info).map { quality ->
                             context.resources.getString(

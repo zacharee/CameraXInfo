@@ -9,12 +9,30 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -37,13 +55,16 @@ import dev.zwander.cameraxinfo.data.createZipFile
 import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import dev.zwander.cameraxinfo.util.*
+import dev.zwander.cameraxinfo.util.ResultSaver
+import dev.zwander.cameraxinfo.util.UploadErrorSaver
+import dev.zwander.cameraxinfo.util.UploadResult
+import dev.zwander.cameraxinfo.util.awaitCatchingError
+import dev.zwander.cameraxinfo.util.signInIfNeeded
+import dev.zwander.cameraxinfo.util.uploadToCloud
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @Composable
 fun UploadCard(modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -122,7 +143,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
             title = stringResource(id = R.string.uploading),
             content = {
                 Crossfade(
-                    targetState = uploadStatus,
+                    targetState = uploadStatus, label = "Upload",
                 ) {
                     when (it) {
                         UploadResult.Uploading -> {

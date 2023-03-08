@@ -57,6 +57,10 @@ object UploadErrorSaver : Saver<MutableState<Pair<Exception?, Uri?>?>, String> {
     override fun restore(value: String): MutableState<Pair<Exception?, Uri?>?> {
         val (error, uri) = value.split(DELIM)
 
+        if (error.isBlank() || uri.isBlank()) {
+            return mutableStateOf(null)
+        }
+
         return mutableStateOf(
             ErrorSaver.restore(error).value to Uri.parse(uri)
         )
@@ -64,7 +68,7 @@ object UploadErrorSaver : Saver<MutableState<Pair<Exception?, Uri?>?>, String> {
 
     override fun SaverScope.save(value: MutableState<Pair<Exception?, Uri?>?>): String {
         return with (ErrorSaver) {
-            "${save(mutableStateOf(value.value?.first))}$DELIM${value.value?.second?.toString()}"
+            "${save(mutableStateOf(value.value?.first))}$DELIM${value.value?.second?.toString() ?: ""}"
         }
     }
 }
