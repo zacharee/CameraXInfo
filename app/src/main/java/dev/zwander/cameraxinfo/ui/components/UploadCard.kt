@@ -143,7 +143,8 @@ fun UploadCard(modifier: Modifier = Modifier) {
             title = stringResource(id = R.string.uploading),
             content = {
                 Crossfade(
-                    targetState = uploadStatus, label = "Upload",
+                    targetState = uploadStatus,
+                    label = "Upload",
                 ) {
                     when (it) {
                         UploadResult.Uploading -> {

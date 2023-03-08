@@ -72,7 +72,8 @@ fun SupportStateIcon(
     ) {
         Crossfade(
             targetState = state,
-            modifier = Modifier.heightIn(max = 24.dp), label = "SupportState"
+            modifier = Modifier.heightIn(max = 24.dp),
+            label = "SupportState"
         ) {
             when (it) {
                 SupportState.SUPPORTED -> {
