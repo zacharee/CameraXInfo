@@ -1,26 +1,25 @@
 package dev.zwander.cameraxinfo.ui.components
 
-import android.content.Context
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltipBox
+import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import dev.zwander.cameraxinfo.R
@@ -73,47 +72,44 @@ fun SupportStateIcon(
     ) {
         Crossfade(
             targetState = state,
-            modifier = Modifier.heightIn(max = 24.dp)
+            modifier = Modifier.heightIn(max = 24.dp), label = "SupportState"
         ) {
             when (it) {
                 SupportState.SUPPORTED -> {
-                    Icon(
+                    TooltippedIcon(
                         painter = painterResource(id = R.drawable.check),
                         tint = greenShifted,
                         contentDescription = stringResource(id = R.string.supported),
-                        modifier = Modifier.toastClick(R.string.supported)
                     )
                 }
                 SupportState.UNSUPPORTED -> {
-                    Icon(
+                    TooltippedIcon(
                         painter = painterResource(id = R.drawable.close),
                         tint = redShifted,
                         contentDescription = stringResource(id = R.string.unsupported),
-                        modifier = Modifier.toastClick(R.string.unsupported)
                     )
                 }
                 SupportState.OUTDATED -> {
-                    Icon(
+                    TooltippedIcon(
                         painter = painterResource(id = R.drawable.update),
                         tint = yellowShifted,
                         contentDescription = stringResource(id = R.string.outdated),
-                        modifier = Modifier.toastClick(R.string.outdated)
                     )
                 }
                 SupportState.NOT_APPLICABLE -> {
-                    Icon(
+                    TooltippedIcon(
                         painter = painterResource(id = R.drawable.circle),
                         tint = contentColor,
                         contentDescription = stringResource(id = R.string.not_applicable),
-                        modifier = Modifier.fillMaxWidth(0.15f).toastClick(R.string.not_applicable)
+                        modifier = Modifier
+                            .fillMaxWidth(0.15f)
                     )
                 }
                 SupportState.UNKNOWN -> {
-                    Icon(
+                    TooltippedIcon(
                         painter = painterResource(id = R.drawable.question_mark),
                         tint = yellowShifted,
                         contentDescription = stringResource(id = R.string.unknown),
-                        modifier = Modifier.toastClick(R.string.unknown)
                     )
                 }
             }
@@ -121,14 +117,34 @@ fun SupportStateIcon(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Modifier.toastClick(@StringRes message: Int): Modifier {
-    val context = LocalContext.current
-
-    return clickable(
-        MutableInteractionSource(),
-        null
+private fun TooltippedIcon(
+    painter: Painter,
+    tint: Color,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    message: String = contentDescription,
+) {
+    PlainTooltipBox(
+        tooltip = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.wrapContentWidth(unbounded = true)
+            ) {
+                Text(
+                    text = message,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        },
+        modifier = modifier
     ) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Icon(
+            painter = painter,
+            tint = tint,
+            contentDescription = contentDescription,
+            modifier = Modifier.tooltipAnchor()
+        )
     }
 }
