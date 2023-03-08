@@ -7,6 +7,7 @@ import android.hardware.camera2.CameraExtensionCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.extensions.ExtensionMode
 import androidx.camera.extensions.ExtensionsManager
@@ -103,16 +104,22 @@ class DataModel {
                 @Suppress("DeferredResultUnused")
                 async(Dispatchers.IO) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        val physicals = withContext(Dispatchers.IO) {
-                            val logicalChars =
-                                cameraManager.getCameraCharacteristics(info2.cameraId)
+                        try {
+                            val physicals = withContext(Dispatchers.IO) {
+                                val logicalChars =
+                                    cameraManager.getCameraCharacteristics(info2.cameraId)
 
-                            logicalChars.physicalCameraIds.map { id ->
-                                id to cameraManager.getCameraCharacteristics(id)
+                                logicalChars.physicalCameraIds.map { id ->
+                                    id to cameraManager.getCameraCharacteristics(id)
+                                }
+                            }
+
+                            physicalSensors[info2.cameraId] = physicals.toMap()
+                        } catch (e: IllegalArgumentException) {
+                            launch(Dispatchers.Main) {
+                                Toast.makeText(context, R.string.unable_to_retrieve_cameras, Toast.LENGTH_SHORT).show()
                             }
                         }
-
-                        physicalSensors[info2.cameraId] = physicals.toMap()
                     }
                 }
 
