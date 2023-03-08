@@ -117,7 +117,7 @@ class DataModel {
                             physicalSensors[info2.cameraId] = physicals.toMap()
                         } catch (e: IllegalArgumentException) {
                             launch(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.unable_to_retrieve_cameras, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, R.string.unable_to_retrieve_physical_cameras, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

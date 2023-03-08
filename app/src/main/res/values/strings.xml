@@ -69,7 +69,7 @@
     <string name="extension_support_desc">Note that extension support doesn\'t indicate basic API support. Many devices that have support for Camera2 do not support Camera2 extensions or CameraX extensions. The table below only displays what features your device manufacturer has exposed to third party apps. It does NOT represent the features built into the native camera app.</string>
     <string name="logical_sensor_desc">The camera ID here may represent a logical sensor, rather than a physical one. If this is a logical camera, there will be a table below showing which physical sensors it represents.</string>
     <string name="physical_sensors_desc">These are the physical sensors your device manufacturer has grouped into a single logical sensor. Depending on which third-party camera app you use, these may all be treated as a single camera, with the system automatically switching among them for different light and zoom levels.</string>
-    <string name="unable_to_retrieve_cameras">Unable to retrieve camera info.</string>
+    <string name="unable_to_retrieve_physical_cameras">Unable to retrieve physical camera info.</string>
 
     <string name="front_facing_json" translatable="false">Front-Facing</string>
     <string name="rear_facing_json" translatable="false">Rear-Facing</string>
