@@ -2,14 +2,19 @@ package dev.zwander.cameraxinfo
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -17,10 +22,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.google.firebase.appcheck.FirebaseAppCheck
-import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.ui.components.*
@@ -40,11 +41,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val firebaseAppCheck = FirebaseAppCheck.getInstance()
-        firebaseAppCheck.installAppCheckProviderFactory(
-            SafetyNetAppCheckProviderFactory.getInstance()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
 
         if (checkCallingOrSelfPermission(android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissionsRequester.launch(android.Manifest.permission.CAMERA)
@@ -56,8 +59,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class,
+    ExperimentalMaterial3Api::class
+)
 @SuppressLint("UnsafeOptInUsageError", "InlinedApi")
 @Preview
 @Composable
@@ -69,7 +73,7 @@ fun MainContent() {
         val model = LocalDataModel.current
 
         var lastRefresh by remember {
-            mutableStateOf(System.currentTimeMillis())
+            mutableLongStateOf(System.currentTimeMillis())
         }
         var isRefreshing by remember {
             mutableStateOf(false)
@@ -86,20 +90,24 @@ fun MainContent() {
         CameraXInfoTheme {
             Surface(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background
+                color = MaterialTheme.colorScheme.background,
             ) {
-                SwipeRefresh(
-                    state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
                     onRefresh = { lastRefresh = System.currentTimeMillis() }
                 ) {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(8.dp),
+                        contentPadding = WindowInsets.systemBars.add(
+                            WindowInsets.ime,
+                        ).add(
+                            WindowInsets(8.dp)
+                        ).asPaddingValues(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         item(key = "InfoCard") {
                             AnimateInBox(
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier.animateItem()
                             ) {
                                 InfoCard(lastRefresh)
                             }
@@ -107,7 +115,7 @@ fun MainContent() {
 
                         item(key = "UploadCard") {
                             AnimateInBox(
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier.animateItem()
                             ) {
                                 UploadCard()
                             }
@@ -115,7 +123,7 @@ fun MainContent() {
 
                         item(key = "ARCore") {
                             AnimateInBox(
-                                modifier = Modifier.animateItemPlacement()
+                                modifier = Modifier.animateItem()
                             ) {
                                 ARCoreCard()
                             }
@@ -124,7 +132,7 @@ fun MainContent() {
                         model.cameraInfos.forEach { (_, info2) ->
                             item(key = info2.cameraId) {
                                 AnimateInBox(
-                                    modifier = Modifier.animateItemPlacement()
+                                    modifier = Modifier.animateItem()
                                 ) {
                                     CameraCard(
                                         which2 = info2,

@@ -5,7 +5,6 @@ androidGradlePlugin = "8.10.1"
 ar-core = "1.49.0"
 camera = "1.4.2"
 composeBom = "2025.06.00"
-compose-material-icons-core = "1.7.8"
 constraintlayoutCompose = "1.1.1"
 coreKtx = "1.16.0"
 firebaseBom = "33.15.0"
@@ -18,7 +17,7 @@ kotlinxCoroutinesPlayServices = "1.10.2"
 lifecycleRuntimeKtx = "2.9.1"
 material = "1.12.0"
 patreonsupportersretrieval = "8436bbdbdc"
-play-integrity-api = "1.4.0"
+play-services-safetynet = "18.1.0"
 preferenceKtx = "1.2.1"
 zip4j = "2.11.5"
 
@@ -39,6 +38,7 @@ compose-ui = { module = "androidx.compose.ui:ui" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx" }
@@ -50,7 +50,7 @@ kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-cor
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 patreonsupportersretrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
-play-integrity-api = { module = "com.google.android.play:integrity", version.ref = "play-integrity-api" }
+play-services-safetynet = { module = "com.google.android.gms:play-services-safetynet", version.ref = "play-services-safetynet" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 

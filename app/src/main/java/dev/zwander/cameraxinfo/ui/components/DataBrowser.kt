@@ -30,7 +30,6 @@ enum class SortMode {
     COUNT
 }
 
-@Suppress("OPT_IN_IS_NOT_ENABLED")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DataBrowser(
@@ -141,7 +140,7 @@ fun DataBrowser(
                         SortMode.COUNT -> sortedBy { -it.children.size }
                     }
                 } ?: listOf(), key = { it.absolutePath }) {
-                    it.StorageListItem(Modifier.animateItemPlacement()) {
+                    it.StorageListItem(Modifier.animateItem()) {
                         model.currentPath = it
                     }
                 }
@@ -185,7 +184,7 @@ private fun Node.StorageListItem(modifier: Modifier = Modifier, onClick: () -> U
 
             Spacer(Modifier.weight(1f))
 
-            if (children.size > 0 && content == null) {
+            if (children.isNotEmpty() && content == null) {
                 Text(
                     text = "(${children.size})"
                 )

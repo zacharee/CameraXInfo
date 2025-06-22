@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.atan
+import androidx.core.net.toUri
 
 fun Int?.lensFacingToString(context: Context, ui: Boolean = true): String {
     return context.resources.getString(
@@ -71,7 +72,7 @@ fun getFOV(focal: Float, frameSize: SizeF, alwaysShowPeriod: Boolean = false): S
 fun Context.launchUrl(url: String) {
     try {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse(url)
+        intent.data = url.toUri()
 
         startActivity(intent)
     } catch (_: Exception) {}

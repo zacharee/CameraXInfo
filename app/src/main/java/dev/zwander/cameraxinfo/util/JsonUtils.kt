@@ -8,7 +8,7 @@ import androidx.compose.runtime.saveable.SaverScope
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import dev.zwander.cameraxinfo.util.ResultSaver.save
+import androidx.core.net.toUri
 
 val uploadResultGson: Gson = GsonBuilder().registerTypeAdapterFactory(
     RuntimeTypeAdapterFactory.of(UploadResult::class.java)
@@ -62,7 +62,7 @@ object UploadErrorSaver : Saver<MutableState<Pair<Exception?, Uri?>?>, String> {
         }
 
         return mutableStateOf(
-            ErrorSaver.restore(error).value to Uri.parse(uri)
+            ErrorSaver.restore(error).value to uri.toUri()
         )
     }
 

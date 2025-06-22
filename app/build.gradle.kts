@@ -79,9 +79,10 @@ dependencies {
     implementation(libs.gson)
 
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.firestore.ktx)
-    implementation(libs.play.integrity.api)
+    implementation(libs.play.services.safetynet)
 }
