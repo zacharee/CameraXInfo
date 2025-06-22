@@ -90,4 +90,13 @@
     <string name="video_quality_hdr_10_plus">HDR10+</string>
     <string name="video_quality_dolby_vision_10_bit">DV 10-bit</string>
     <string name="video_quality_dolby_vision_8_bit">DV 8-bit</string>
+
+    <string name="image_capture_capabilities">Image Capture Capabilities</string>
+    <string name="output_format">%s Output</string>
+    <string name="postview">Post-View</string>
+    <string name="capture_process_progress">Capture Process Progress</string>
+    <string name="jpeg">JPEG</string>
+    <string name="raw">RAW</string>
+    <string name="ultra_hdr">Ultra HDR</string>
+    <string name="raw_jpeg">RAW + JPEG</string>
 </resources>

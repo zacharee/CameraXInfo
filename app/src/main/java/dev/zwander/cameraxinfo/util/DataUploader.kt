@@ -178,7 +178,7 @@ fun DataModel.buildInfo(context: Context): String {
                         physicalSensors[info2.cameraId]?.forEach { (_, u) ->
                             put(JSONObject().apply { insertCameraInfo(u, context) })
                         }
-                    }
+                    },
                 )
                 put(
                     "video_qualities",
@@ -186,7 +186,7 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedSdrQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
                 )
                 put(
                     "hlg_video_qualities",
@@ -194,7 +194,7 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedHlgQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
                 )
                 put(
                     "hdr_10_video_qualities",
@@ -202,7 +202,7 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedHdr10Qualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
                 )
                 put(
                     "hdr_10_plus_video_qualities",
@@ -210,7 +210,7 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedHdr10PlusQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
                 )
                 put(
                     "dolby_vision_10_bit_video_qualities",
@@ -218,7 +218,7 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedDolbyVision10BitQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
                 )
                 put(
                     "dolby_vision_8_bit_video_qualities",
@@ -226,7 +226,15 @@ fun DataModel.buildInfo(context: Context): String {
                         supportedDolbyVision8BitQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
-                    }
+                    },
+                )
+                put(
+                    "image_capture_capabilities",
+                    JSONArray().apply {
+                        imageCaptureCapabilities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    },
                 )
                 put(
                     "extensions",
@@ -240,7 +248,7 @@ fun DataModel.buildInfo(context: Context): String {
                                 }
                             )
                         }
-                    }
+                    },
                 )
             }
         )

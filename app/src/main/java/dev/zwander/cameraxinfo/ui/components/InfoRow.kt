@@ -1,7 +1,6 @@
 package dev.zwander.cameraxinfo.ui.components
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,35 +8,35 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.zwander.cameraxinfo.R
+import dev.zwander.cameraxinfo.util.ArrangementExt
 
 @Composable
-fun VideoQualities(
-    dynamicRange: String,
+fun InfoRow(
+    title: String,
     supportedQualities: List<String>?,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .animateContentSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
-            text = stringResource(id = R.string.video_qualities_format, dynamicRange),
+            text = title,
             fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
+            fontSize = 18.sp,
         )
 
         FlowRow(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = ArrangementExt.SpaceEvenly(8.dp),
             modifier = Modifier.fillMaxWidth()
-                .animateContentSize()
+                .animateContentSize(),
         ) {
             supportedQualities?.forEach {
                 Text(
-                    text = it
+                    text = it,
                 )
             }
         }

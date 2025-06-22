@@ -55,6 +55,7 @@ import dev.zwander.cameraxinfo.data.createZipFile
 import dev.zwander.cameraxinfo.latestDownloadTime
 import dev.zwander.cameraxinfo.latestUploadTime
 import dev.zwander.cameraxinfo.model.LocalDataModel
+import dev.zwander.cameraxinfo.util.ArrangementExt
 import dev.zwander.cameraxinfo.util.ResultSaver
 import dev.zwander.cameraxinfo.util.UploadErrorSaver
 import dev.zwander.cameraxinfo.util.UploadResult
@@ -202,7 +203,7 @@ fun UploadCard(modifier: Modifier = Modifier) {
 
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = ArrangementExt.SpaceEvenly(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.launchUrl
+import dev.zwander.cameraxinfo.util.ArrangementExt
 import tk.zwander.patreonsupportersretrieval.data.SupporterInfo
 import tk.zwander.patreonsupportersretrieval.util.DataParser
 
@@ -78,7 +79,7 @@ fun InfoCard(refreshTime: Long, modifier: Modifier = Modifier) {
 
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = ArrangementExt.SpaceEvenly(8.dp),
         ) {
             item(key = "Website") {
                 LinkIconButton(

@@ -104,11 +104,24 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
                 Column {
                     Spacer(modifier = Modifier.size(4.dp))
 
-                    VideoQualities(
-                        dynamicRange = stringResource(dynamicRange),
-                        supportedQualities = supportedQualities ?: listOf(),
+                    InfoRow(
+                        title = stringResource(id = R.string.video_qualities_format, stringResource(dynamicRange)),
+                        supportedQualities = supportedQualities,
                     )
                 }
+            }
+        }
+
+        val imageCaptureCapabilities = model.imageCaptureCapabilities[which2.cameraId]
+
+        AnimatedVisibility(visible = !imageCaptureCapabilities.isNullOrEmpty()) {
+            Column {
+                Spacer(modifier = Modifier.size(4.dp))
+
+                InfoRow(
+                    title = stringResource(R.string.image_capture_capabilities),
+                    supportedQualities = imageCaptureCapabilities,
+                )
             }
         }
 

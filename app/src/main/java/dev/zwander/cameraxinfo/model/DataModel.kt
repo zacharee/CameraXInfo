@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.DynamicRange
+import androidx.camera.core.ImageCapture
 import androidx.camera.extensions.ExtensionMode
 import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -45,6 +46,7 @@ class DataModel {
     val physicalSensors = mutableStateMapOf<String, Map<String, CameraCharacteristics>>()
     val extensions = mutableStateMapOf<String, Map<Int, ExtensionAvailability>>()
     val cameraInfos = mutableStateListOf<CameraInfoHolder>()
+    val imageCaptureCapabilities = mutableStateMapOf<String, List<String>>()
 
     var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
     var depthStatus by mutableStateOf<Boolean?>(null)
@@ -107,8 +109,7 @@ class DataModel {
                 cameraInfo = it,
                 camera2Info = Camera2CameraInfo.from(it)
             ).also { (info, info2) ->
-                @Suppress("DeferredResultUnused")
-                async(Dispatchers.IO) {
+                launch(Dispatchers.IO) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         try {
                             val physicals = withContext(Dispatchers.IO) {
@@ -129,8 +130,7 @@ class DataModel {
                     }
                 }
 
-                @Suppress("DeferredResultUnused")
-                async(Dispatchers.IO) {
+                launch(Dispatchers.IO) {
                     val camera2Extensions =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             withContext(Dispatchers.IO) {
@@ -167,8 +167,7 @@ class DataModel {
                     extensions[info2.cameraId] = extensionAvailability.toMap()
                 }
 
-                @Suppress("DeferredResultUnused")
-                async(Dispatchers.IO) {
+                launch(Dispatchers.IO) {
                     val videoCapabilities = Recorder.getVideoCapabilities(info)
                     supportedSdrQualities[info2.cameraId] =
                         videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
@@ -182,6 +181,40 @@ class DataModel {
                         videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
                     supportedDolbyVision8BitQualities[info2.cameraId] =
                         videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
+                }
+
+                launch(Dispatchers.IO) {
+                    val imageCaptureCapabilities = ImageCapture.getImageCaptureCapabilities(info)
+                    val captureProcessProgress = imageCaptureCapabilities.isCaptureProcessProgressSupported
+                    val postView = imageCaptureCapabilities.isPostviewSupported
+                    val outputFormats = imageCaptureCapabilities.supportedOutputFormats
+
+                    val capabilitiesList = mutableListOf<String>()
+
+                    if (captureProcessProgress) {
+                        capabilitiesList.add(context.resources.getString(R.string.capture_process_progress))
+                    }
+
+                    if (postView) {
+                        capabilitiesList.add(context.resources.getString(R.string.postview))
+                    }
+
+                    capabilitiesList.addAll(outputFormats.map { format ->
+                        val value = when (format) {
+                            ImageCapture.OUTPUT_FORMAT_JPEG -> R.string.jpeg
+                            ImageCapture.OUTPUT_FORMAT_RAW -> R.string.raw
+                            ImageCapture.OUTPUT_FORMAT_RAW_JPEG -> R.string.raw_jpeg
+                            ImageCapture.OUTPUT_FORMAT_JPEG_ULTRA_HDR -> R.string.ultra_hdr
+                            else -> R.string.unknown
+                        }
+
+                        context.resources.getString(
+                            R.string.output_format,
+                            context.resources.getString(value),
+                        )
+                    })
+
+                    this@DataModel.imageCaptureCapabilities[info2.cameraId] = capabilitiesList
                 }
             }
         }.sortedBy { (_, info2) ->
