@@ -2,7 +2,7 @@
 activityCompose = "1.10.1"
 androidGradlePlugin = "8.10.1"
 ar-core = "1.49.0"
-camera = "1.4.2"
+camera = "1.5.0-beta01"
 composeBom = "2025.06.00"
 constraintlayoutCompose = "1.1.1"
 coreKtx = "1.16.0"
