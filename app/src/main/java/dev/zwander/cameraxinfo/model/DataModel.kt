@@ -99,7 +99,7 @@ class DataModel {
 
         val (p, e) = withContext(Dispatchers.IO) {
             val provider = ProcessCameraProvider.getInstance(context).await()
-            provider to ExtensionsManager.getInstanceAsync(context, provider)
+            provider to ExtensionsManager.getInstanceAsync(context, provider).await()
         }
 
         val newList = p.availableCameraInfos.map {
@@ -151,7 +151,7 @@ class DataModel {
                             extension = cameraXExtension,
                             camera2Availability = camera2Extensions.contains(camera2Extension),
                             cameraXAvailability = try {
-                                e.await().isExtensionAvailable(
+                                e.isExtensionAvailable(
                                     info.cameraSelector,
                                     cameraXExtension
                                 )
