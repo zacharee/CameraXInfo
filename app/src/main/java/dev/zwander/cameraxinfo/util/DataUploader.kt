@@ -180,7 +180,47 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "video_qualities",
                     JSONArray().apply {
-                        supportedQualities[info2.cameraId]?.forEach { q ->
+                        supportedSdrQualities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    }
+                )
+                put(
+                    "hlg_video_qualities",
+                    JSONArray().apply {
+                        supportedHlgQualities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    }
+                )
+                put(
+                    "hdr_10_video_qualities",
+                    JSONArray().apply {
+                        supportedHdr10Qualities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    }
+                )
+                put(
+                    "hdr_10_plus_video_qualities",
+                    JSONArray().apply {
+                        supportedHdr10PlusQualities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    }
+                )
+                put(
+                    "dolby_vision_10_bit_video_qualities",
+                    JSONArray().apply {
+                        supportedDolbyVision10BitQualities[info2.cameraId]?.forEach { q ->
+                            put(q)
+                        }
+                    }
+                )
+                put(
+                    "dolby_vision_8_bit_video_qualities",
+                    JSONArray().apply {
+                        supportedDolbyVision8BitQualities[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     }

@@ -72,7 +72,6 @@ dependencies {
     implementation(libs.patreonsupportersretrieval)
     implementation(libs.zip4j)
 
-    implementation(libs.accompanist.flowlayout)
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.material)
     implementation(libs.ar.core)

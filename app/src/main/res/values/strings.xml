@@ -47,6 +47,7 @@
     <string name="id">ID</string>
     <string name="extension_support">Extension Support</string>
     <string name="info">Info</string>
+    <string name="donate">Donate</string>
 
     <string name="sd">480p</string>
     <string name="hd">720p</string>
@@ -81,4 +82,12 @@
     <string name="face_retouch_json" translatable="false">Face Retouch</string>
     <string name="none_json" translatable="false">None</string>
     <string name="unknown_json" translatable="false">Unknown</string>
+
+    <string name="video_qualities_format">%s Video Qualities</string>
+    <string name="video_quality_sdr">SDR</string>
+    <string name="video_quality_hlg">HLG</string>
+    <string name="video_quality_hdr_10">HDR10</string>
+    <string name="video_quality_hdr_10_plus">HDR10+</string>
+    <string name="video_quality_dolby_vision_10_bit">DV 10-bit</string>
+    <string name="video_quality_dolby_vision_8_bit">DV 8-bit</string>
 </resources>

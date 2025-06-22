@@ -9,11 +9,12 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.core.DynamicRange
 import androidx.camera.extensions.ExtensionMode
 import androidx.camera.extensions.ExtensionsManager
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
-import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
 import androidx.compose.runtime.*
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
@@ -35,7 +36,12 @@ import kotlin.math.absoluteValue
 val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 
 class DataModel {
-    val supportedQualities = mutableStateMapOf<String, List<String>>()
+    val supportedSdrQualities = mutableStateMapOf<String, List<String>>()
+    val supportedHlgQualities = mutableStateMapOf<String, List<String>>()
+    val supportedHdr10Qualities = mutableStateMapOf<String, List<String>>()
+    val supportedHdr10PlusQualities = mutableStateMapOf<String, List<String>>()
+    val supportedDolbyVision10BitQualities = mutableStateMapOf<String, List<String>>()
+    val supportedDolbyVision8BitQualities = mutableStateMapOf<String, List<String>>()
     val physicalSensors = mutableStateMapOf<String, Map<String, CameraCharacteristics>>()
     val extensions = mutableStateMapOf<String, Map<Int, ExtensionAvailability>>()
     val cameraInfos = mutableStateListOf<CameraInfoHolder>()
@@ -115,7 +121,7 @@ class DataModel {
                             }
 
                             physicalSensors[info2.cameraId] = physicals.toMap()
-                        } catch (e: IllegalArgumentException) {
+                        } catch (_: IllegalArgumentException) {
                             launch(Dispatchers.Main) {
                                 Toast.makeText(context, R.string.unable_to_retrieve_physical_cameras, Toast.LENGTH_SHORT).show()
                             }
@@ -149,7 +155,7 @@ class DataModel {
                                     info.cameraSelector,
                                     cameraXExtension
                                 )
-                            } catch (e: IllegalStateException) {
+                            } catch (_: IllegalStateException) {
                                 // There's a bug in the Pixel Android 14 DP2 CameraX vendor lib where
                                 // it uses the wrong extension constants when initializing extensions,
                                 // causing a crash when checking for extension availability.
@@ -163,18 +169,19 @@ class DataModel {
 
                 @Suppress("DeferredResultUnused")
                 async(Dispatchers.IO) {
-                    supportedQualities[info2.cameraId] =
-                        QualitySelector.getSupportedQualities(info).map { quality ->
-                            context.resources.getString(
-                                when (quality) {
-                                    Quality.SD -> (R.string.sd)
-                                    Quality.HD -> (R.string.hd)
-                                    Quality.FHD -> (R.string.fhd)
-                                    Quality.UHD -> (R.string.uhd)
-                                    else -> (R.string.unknown)
-                                }
-                            )
-                        }.asReversed()
+                    val videoCapabilities = Recorder.getVideoCapabilities(info)
+                    supportedSdrQualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
+                    supportedHlgQualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.HLG_10_BIT).mapQualities(context)
+                    supportedHdr10Qualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.HDR10_10_BIT).mapQualities(context)
+                    supportedHdr10PlusQualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.HDR10_PLUS_10_BIT).mapQualities(context)
+                    supportedDolbyVision10BitQualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
+                    supportedDolbyVision8BitQualities[info2.cameraId] =
+                        videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
                 }
             }
         }.sortedBy { (_, info2) ->
@@ -227,4 +234,18 @@ class DataModel {
             ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
         }
     }
+}
+
+private fun List<Quality>.mapQualities(context: Context): List<String> {
+    return map { quality ->
+        context.resources.getString(
+            when (quality) {
+                Quality.SD -> (R.string.sd)
+                Quality.HD -> (R.string.hd)
+                Quality.FHD -> (R.string.fhd)
+                Quality.UHD -> (R.string.uhd)
+                else -> (R.string.unknown)
+            }
+        )
+    }.asReversed()
 }

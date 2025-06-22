@@ -8,7 +8,7 @@ import androidx.camera.extensions.ExtensionMode
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -59,7 +59,7 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
             }
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .padding(bottom = 8.dp)
                 .fillMaxWidth(0.33f)
@@ -92,13 +92,23 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
                 .animateContentSize()
         )
 
-        val supportedQualities = model.supportedQualities[which2.cameraId]
+        mapOf(
+            R.string.video_quality_sdr to model.supportedSdrQualities[which2.cameraId],
+            R.string.video_quality_hlg to model.supportedHlgQualities[which2.cameraId],
+            R.string.video_quality_hdr_10 to model.supportedHdr10Qualities[which2.cameraId],
+            R.string.video_quality_hdr_10_plus to model.supportedHdr10PlusQualities[which2.cameraId],
+            R.string.video_quality_dolby_vision_10_bit to model.supportedDolbyVision10BitQualities[which2.cameraId],
+            R.string.video_quality_dolby_vision_8_bit to model.supportedDolbyVision8BitQualities[which2.cameraId],
+        ).forEach { (dynamicRange, supportedQualities) ->
+            AnimatedVisibility(visible = supportedQualities?.isNotEmpty() == true) {
+                Column {
+                    Spacer(modifier = Modifier.size(4.dp))
 
-        AnimatedVisibility(visible = supportedQualities?.isNotEmpty() == true) {
-            Column {
-                Spacer(modifier = Modifier.size(4.dp))
-
-                VideoQualities(supportedQualities = supportedQualities ?: listOf())
+                    VideoQualities(
+                        dynamicRange = stringResource(dynamicRange),
+                        supportedQualities = supportedQualities ?: listOf(),
+                    )
+                }
             }
         }
 

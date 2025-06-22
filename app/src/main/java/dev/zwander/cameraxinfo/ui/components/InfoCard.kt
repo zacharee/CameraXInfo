@@ -112,6 +112,14 @@ fun InfoCard(refreshTime: Long, modifier: Modifier = Modifier) {
                 )
             }
 
+            item(key = "Donate") {
+                LinkIconButton(
+                    link = "https://www.paypal.com/donate/?hosted_button_id=EWAPDSENZ7U44",
+                    icon = painterResource(id = R.drawable.outline_attach_money_24),
+                    contentDescription = stringResource(id = R.string.donate)
+                )
+            }
+
             item(key = "Supporters") {
                 IconButton(onClick = { showingSupportersList = !showingSupportersList }) {
                     Icon(
