@@ -68,6 +68,7 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
             return UploadResult.SafetyNetFailure
         }
     } catch (e: Exception) {
+        e.printStackTrace()
         return UploadResult.UploadFailure(e)
     }
 
@@ -112,9 +113,11 @@ suspend fun DataModel.uploadToCloud(context: Context): UploadResult {
         d.remove()
 
         if (!task.isSuccessful) {
+            task.exception?.printStackTrace()
             return UploadResult.UploadFailure(task.exception)
         }
     } catch (e: Exception) {
+        e.printStackTrace()
         return UploadResult.UploadFailure(e)
     }
 
