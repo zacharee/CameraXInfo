@@ -42,7 +42,10 @@ fun CameraXInfoTheme(
     if (!view.isInEditMode) {
         SideEffect {
             (view.context as Activity).window.apply {
+                @Suppress("DEPRECATION")
                 statusBarColor = colorScheme.primary.toArgb()
+                @Suppress("DEPRECATION")
+                isStatusBarContrastEnforced = false
                 WindowCompat.getInsetsController(this, view).isAppearanceLightStatusBars = darkTheme
             }
         }

@@ -33,7 +33,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
             fontSize = 28.sp
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 16.dp)
                 .fillMaxWidth(0.33f)
