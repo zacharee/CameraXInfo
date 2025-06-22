@@ -10,9 +10,9 @@ import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.ExtensionAvailability
@@ -47,25 +47,31 @@ fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
                     modifier = Modifier.weight(1f)
                 )
 
-                Text(
-                    text = stringResource(id = R.string.camera2),
+                TooltippedIcon(
+                    painter = painterResource(R.drawable.numeric_2_circle_outline),
+                    contentDescription = stringResource(R.string.camera2),
                     modifier = Modifier.weight(COLUMN_WEIGHT),
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
                 )
 
                 Spacer(Modifier.width(8.dp))
 
-                Text(
-                    text = stringResource(id = R.string.camerax),
+                TooltippedIcon(
+                    painter = painterResource(R.drawable.alpha_x_circle_outline),
+                    contentDescription = stringResource(R.string.camerax),
                     modifier = Modifier.weight(COLUMN_WEIGHT),
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                TooltippedIcon(
+                    painter = painterResource(R.drawable.arm_flex),
+                    contentDescription = stringResource(R.string.camerax_strength),
+                    modifier = Modifier.weight(COLUMN_WEIGHT),
                 )
             }
 
             extensionAvailability.forEach { (extension, availability) ->
-                val (_, camera2Availability, cameraXAvailability) = availability
+                val (_, camera2Availability, cameraXAvailability, extensionStrengthAvailability) = availability
 
                 Row(
                     modifier = Modifier
@@ -87,6 +93,13 @@ fun ExtensionsCard(extensionAvailability: Map<Int, ExtensionAvailability>) {
 
                     SupportStateIcon(
                         state = cameraXAvailability,
+                        modifier = Modifier.weight(COLUMN_WEIGHT)
+                    )
+
+                    Spacer(Modifier.width(8.dp))
+
+                    SupportStateIcon(
+                        state = extensionStrengthAvailability,
                         modifier = Modifier.weight(COLUMN_WEIGHT)
                     )
                 }

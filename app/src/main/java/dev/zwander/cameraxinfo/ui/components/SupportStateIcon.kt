@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
@@ -124,35 +125,40 @@ fun SupportStateIcon(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TooltippedIcon(
+fun TooltippedIcon(
     painter: Painter,
-    tint: Color,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    tint: Color = LocalContentColor.current,
     message: String = contentDescription,
 ) {
-    TooltipBox(
-        tooltip = {
-            ElevatedCard {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(4.dp).wrapContentWidth(unbounded = true),
-                ) {
-                    Text(
-                        text = message,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        },
+    Box(
         modifier = modifier,
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-        state = rememberTooltipState(),
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            painter = painter,
-            tint = tint,
-            contentDescription = contentDescription,
-        )
+        TooltipBox(
+            tooltip = {
+                ElevatedCard {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            .wrapContentWidth(unbounded = true),
+                    ) {
+                        Text(
+                            text = message,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            },
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+            state = rememberTooltipState(),
+        ) {
+            Icon(
+                painter = painter,
+                tint = tint,
+                contentDescription = contentDescription,
+            )
+        }
     }
 }

@@ -99,61 +99,52 @@ class DataModel {
         arCoreStatus = null
         depthStatus = null
 
-        val (p, e) = withContext(Dispatchers.IO) {
-            val provider = ProcessCameraProvider.getInstance(context).await()
-            provider to ExtensionsManager.getInstanceAsync(context, provider).await()
-        }
+        launch(Dispatchers.IO) {
+            val p = ProcessCameraProvider.getInstance(context).await()
+            val e = ExtensionsManager.getInstanceAsync(context, p).await()
 
-        val newList = p.availableCameraInfos.map {
-            CameraInfoHolder(
-                cameraInfo = it,
-                camera2Info = Camera2CameraInfo.from(it)
-            ).also { (info, info2) ->
-                launch(Dispatchers.IO) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                        try {
-                            val physicals = withContext(Dispatchers.IO) {
+            val newList = p.availableCameraInfos.map {
+                CameraInfoHolder(
+                    cameraInfo = it,
+                    camera2Info = Camera2CameraInfo.from(it)
+                ).also { (info, info2) ->
+                    launch(Dispatchers.IO) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            try {
                                 val logicalChars =
                                     cameraManager.getCameraCharacteristics(info2.cameraId)
-
-                                logicalChars.physicalCameraIds.map { id ->
+                                val physicals = logicalChars.physicalCameraIds.map { id ->
                                     id to cameraManager.getCameraCharacteristics(id)
                                 }
-                            }
 
-                            physicalSensors[info2.cameraId] = physicals.toMap()
-                        } catch (_: IllegalArgumentException) {
-                            launch(Dispatchers.Main) {
-                                Toast.makeText(context, R.string.unable_to_retrieve_physical_cameras, Toast.LENGTH_SHORT).show()
+                                physicalSensors[info2.cameraId] = physicals.toMap()
+                            } catch (_: IllegalArgumentException) {
+                                launch(Dispatchers.Main) {
+                                    Toast.makeText(context, R.string.unable_to_retrieve_physical_cameras, Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
                     }
-                }
 
-                launch(Dispatchers.IO) {
-                    val camera2Extensions =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            withContext(Dispatchers.IO) {
+                    launch(Dispatchers.IO) {
+                        val camera2Extensions =
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 cameraManager.getCameraExtensionCharacteristics(info2.cameraId).supportedExtensions
+                            } else {
+                                listOf()
                             }
-                        } else {
-                            listOf()
-                        }
 
-                    val extensionAvailability = arrayOf(
-                        ExtensionMode.AUTO to CameraExtensionCharacteristics.EXTENSION_AUTOMATIC,
-                        ExtensionMode.BOKEH to CameraExtensionCharacteristics.EXTENSION_BOKEH,
-                        ExtensionMode.HDR to CameraExtensionCharacteristics.EXTENSION_HDR,
-                        ExtensionMode.NIGHT to CameraExtensionCharacteristics.EXTENSION_NIGHT,
-                        ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_FACE_RETOUCH
-                    ).map { (cameraXExtension, camera2Extension) ->
-                        cameraXExtension to ExtensionAvailability(
-                            extension = cameraXExtension,
-                            camera2Availability = camera2Extensions.contains(camera2Extension),
-                            cameraXAvailability = try {
+                        val extensionAvailability = arrayOf(
+                            ExtensionMode.AUTO to CameraExtensionCharacteristics.EXTENSION_AUTOMATIC,
+                            ExtensionMode.BOKEH to CameraExtensionCharacteristics.EXTENSION_BOKEH,
+                            ExtensionMode.HDR to CameraExtensionCharacteristics.EXTENSION_HDR,
+                            ExtensionMode.NIGHT to CameraExtensionCharacteristics.EXTENSION_NIGHT,
+                            ExtensionMode.FACE_RETOUCH to CameraExtensionCharacteristics.EXTENSION_FACE_RETOUCH
+                        ).map { (cameraXExtension, camera2Extension) ->
+                            val cameraXExtensionAvailable = try {
                                 e.isExtensionAvailable(
                                     info.cameraSelector,
-                                    cameraXExtension
+                                    cameraXExtension,
                                 )
                             } catch (_: IllegalStateException) {
                                 // There's a bug in the Pixel Android 14 DP2 CameraX vendor lib where
@@ -161,71 +152,90 @@ class DataModel {
                                 // causing a crash when checking for extension availability.
                                 null
                             }
-                        )
-                    }
 
-                    extensions[info2.cameraId] = extensionAvailability.toMap()
-                }
-
-                launch(Dispatchers.IO) {
-                    val videoCapabilities = Recorder.getVideoCapabilities(info)
-                    supportedSdrQualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
-                    supportedHlgQualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.HLG_10_BIT).mapQualities(context)
-                    supportedHdr10Qualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.HDR10_10_BIT).mapQualities(context)
-                    supportedHdr10PlusQualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.HDR10_PLUS_10_BIT).mapQualities(context)
-                    supportedDolbyVision10BitQualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
-                    supportedDolbyVision8BitQualities[info2.cameraId] =
-                        videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
-                }
-
-                launch(Dispatchers.IO) {
-                    val imageCaptureCapabilities = ImageCapture.getImageCaptureCapabilities(info)
-                    val captureProcessProgress = imageCaptureCapabilities.isCaptureProcessProgressSupported
-                    val postView = imageCaptureCapabilities.isPostviewSupported
-                    val outputFormats = imageCaptureCapabilities.supportedOutputFormats
-
-                    val capabilitiesList = mutableListOf<String>()
-
-                    if (captureProcessProgress) {
-                        capabilitiesList.add(context.resources.getString(R.string.capture_process_progress))
-                    }
-
-                    if (postView) {
-                        capabilitiesList.add(context.resources.getString(R.string.postview))
-                    }
-
-                    capabilitiesList.addAll(outputFormats.map { format ->
-                        val value = when (format) {
-                            ImageCapture.OUTPUT_FORMAT_JPEG -> R.string.jpeg
-                            ImageCapture.OUTPUT_FORMAT_RAW -> R.string.raw
-                            ImageCapture.OUTPUT_FORMAT_RAW_JPEG -> R.string.raw_jpeg
-                            ImageCapture.OUTPUT_FORMAT_JPEG_ULTRA_HDR -> R.string.ultra_hdr
-                            else -> R.string.unknown
+                            cameraXExtension to ExtensionAvailability(
+                                extension = cameraXExtension,
+                                camera2Availability = camera2Extensions.contains(camera2Extension),
+                                cameraXAvailability = cameraXExtensionAvailable,
+                                strengthAvailability = when (cameraXExtensionAvailable) {
+                                    true -> {
+                                        e.getCameraExtensionsInfo(
+                                            p.getCameraInfo(e.getExtensionEnabledCameraSelector(info.cameraSelector, cameraXExtension)),
+                                        ).isExtensionStrengthAvailable
+                                    }
+                                    false -> {
+                                        false
+                                    }
+                                    else -> {
+                                        null
+                                    }
+                                },
+                            )
                         }
 
-                        context.resources.getString(
-                            R.string.output_format,
-                            context.resources.getString(value),
-                        )
-                    })
+                        extensions[info2.cameraId] = extensionAvailability.toMap()
+                    }
 
-                    this@DataModel.imageCaptureCapabilities[info2.cameraId] = capabilitiesList
+                    launch(Dispatchers.IO) {
+                        val videoCapabilities = Recorder.getVideoCapabilities(info)
+                        supportedSdrQualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
+                        supportedHlgQualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.HLG_10_BIT).mapQualities(context)
+                        supportedHdr10Qualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.HDR10_10_BIT).mapQualities(context)
+                        supportedHdr10PlusQualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.HDR10_PLUS_10_BIT).mapQualities(context)
+                        supportedDolbyVision10BitQualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
+                        supportedDolbyVision8BitQualities[info2.cameraId] =
+                            videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
+                    }
+
+                    launch(Dispatchers.IO) {
+                        val imageCaptureCapabilities = ImageCapture.getImageCaptureCapabilities(info)
+                        val captureProcessProgress = imageCaptureCapabilities.isCaptureProcessProgressSupported
+                        val postView = imageCaptureCapabilities.isPostviewSupported
+                        val outputFormats = imageCaptureCapabilities.supportedOutputFormats
+
+                        val capabilitiesList = mutableListOf<String>()
+
+                        if (captureProcessProgress) {
+                            capabilitiesList.add(context.resources.getString(R.string.capture_process_progress))
+                        }
+
+                        if (postView) {
+                            capabilitiesList.add(context.resources.getString(R.string.postview))
+                        }
+
+                        capabilitiesList.addAll(outputFormats.map { format ->
+                            val value = when (format) {
+                                ImageCapture.OUTPUT_FORMAT_JPEG -> R.string.jpeg
+                                ImageCapture.OUTPUT_FORMAT_RAW -> R.string.raw
+                                ImageCapture.OUTPUT_FORMAT_RAW_JPEG -> R.string.raw_jpeg
+                                ImageCapture.OUTPUT_FORMAT_JPEG_ULTRA_HDR -> R.string.ultra_hdr
+                                else -> R.string.unknown
+                            }
+
+                            context.resources.getString(
+                                R.string.output_format,
+                                context.resources.getString(value),
+                            )
+                        })
+
+                        this@DataModel.imageCaptureCapabilities[info2.cameraId] = capabilitiesList
+                    }
                 }
+            }.sortedBy { (_, info2) ->
+                info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
             }
-        }.sortedBy { (_, info2) ->
-            info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
+
+            cameraInfos.clear()
+            cameraInfos.addAll(newList)
         }
 
-        cameraInfos.clear()
-        cameraInfos.addAll(newList)
-
-        val status = withContext(Dispatchers.IO) {
-            ArCoreApk.getInstance().run {
+        launch(Dispatchers.IO) {
+            val status = ArCoreApk.getInstance().run {
                 try {
                     this::class.java.declaredFields.find { it.type == ArCoreApk.Availability::class.java }
                         ?.apply { isAccessible = true }
@@ -241,10 +251,8 @@ class DataModel {
                     null
                 }
             }
-        }
 
-        depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
-            withContext(Dispatchers.IO) {
+            depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
                 try {
                     val session = Session(context)
                     session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
@@ -254,17 +262,17 @@ class DataModel {
                     Log.e("CameraXInfo", "Error checking depth mode status", e)
                     false
                 }
+            } else {
+                null
             }
-        } else {
-            null
-        }
 
-        arCoreStatus = try {
-            Session(context).close()
-            status
-        } catch (e: Throwable) {
-            Log.e("CameraXInfo", "Error opening session", e)
-            ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+            arCoreStatus = try {
+                Session(context).close()
+                status
+            } catch (e: Throwable) {
+                Log.e("CameraXInfo", "Error opening session", e)
+                ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE
+            }
         }
     }
 }
