@@ -33,6 +33,10 @@
         </activity>
 
         <meta-data android:name="com.google.ar.core" android:value="optional" />
+
+        <meta-data
+            android:name="com.bugsnag.android.API_KEY"
+            android:value="19c5f1ecaa94098d81c62c4d1fc41129"/>
     </application>
 
 </manifest>

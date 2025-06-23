@@ -84,4 +84,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
 
     implementation(libs.mvvm.flow.compose)
+
+    implementation(libs.bugsnag.android)
+    implementation(libs.bugsnag.android.performance)
 }
