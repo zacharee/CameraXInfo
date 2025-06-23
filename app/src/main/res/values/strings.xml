@@ -100,4 +100,7 @@
     <string name="raw">RAW</string>
     <string name="ultra_hdr">Ultra HDR</string>
     <string name="raw_jpeg">RAW + JPEG</string>
+
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
 </resources>

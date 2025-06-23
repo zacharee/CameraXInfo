@@ -19,7 +19,7 @@ fun PaddedColumnCard(
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             content()
         }
