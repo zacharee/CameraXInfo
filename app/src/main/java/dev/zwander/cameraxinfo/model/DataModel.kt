@@ -271,8 +271,15 @@ class DataModel {
                         }
                     }
                 }
-            }.sortedBy { (_, info2) ->
-                info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
+            }.sortedWith { (_, info1), (_, info2) ->
+                val firstFacing = info1.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1) ?: -1
+                val secondFacing = info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1) ?: -1
+
+                if (firstFacing != secondFacing) {
+                    firstFacing.compareTo(secondFacing)
+                } else {
+                    info1.cameraId.compareTo(info2.cameraId)
+                }
             }
 
             cameraInfos.value = newList
