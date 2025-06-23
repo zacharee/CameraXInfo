@@ -84,4 +84,5 @@ dependencies {
 
     implementation(libs.bugsnag.android)
     implementation(libs.bugsnag.android.performance)
+    implementation(libs.relinker)
 }

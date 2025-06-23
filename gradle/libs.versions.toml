@@ -19,6 +19,7 @@ material = "1.12.0"
 mvvmCompose = "0.16.1"
 patreonsupportersretrieval = "8436bbdbdc"
 preferenceKtx = "1.2.1"
+relinker = "1.4.5"
 zip4j = "2.11.5"
 
 [libraries]
@@ -50,6 +51,7 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 mvvm-flow-compose = { module = "dev.icerock.moko:mvvm-flow-compose", version.ref = "mvvmCompose" }
 patreonsupportersretrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
+relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relinker" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }
 
 [plugins]
