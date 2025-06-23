@@ -31,7 +31,6 @@ import dev.zwander.cameraxinfo.formatResolution
 import dev.zwander.cameraxinfo.getFOV
 import dev.zwander.cameraxinfo.lensFacingToString
 import dev.zwander.cameraxinfo.model.LocalDataModel
-import kotlin.math.exp
 
 val defaultExtensionState = mapOf(
     ExtensionMode.AUTO to ExtensionAvailability(ExtensionMode.AUTO),
