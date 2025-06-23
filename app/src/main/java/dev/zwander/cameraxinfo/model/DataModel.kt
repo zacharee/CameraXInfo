@@ -128,7 +128,9 @@ class DataModel {
                                 }
                             }
 
-                            physicalSensors.value = newPhysicalSensors
+                            physicalSensors.update { s ->
+                                s + newPhysicalSensors
+                            }
                         }
                     }
 
@@ -183,7 +185,9 @@ class DataModel {
 
                         newExtensionsMap[info2.cameraId] = extensionAvailability.toMap()
 
-                        extensions.value = newExtensionsMap
+                        extensions.update { e ->
+                            e + newExtensionsMap
+                        }
                     }
 
                     launch(Dispatchers.IO) {
@@ -262,7 +266,9 @@ class DataModel {
 
                         newCapabilitiesMap[info2.cameraId] = capabilitiesList
 
-                        this@DataModel.imageCaptureCapabilities.value = newCapabilitiesMap
+                        this@DataModel.imageCaptureCapabilities.update { c ->
+                            c + newCapabilitiesMap
+                        }
                     }
                 }
             }.sortedBy { (_, info2) ->
