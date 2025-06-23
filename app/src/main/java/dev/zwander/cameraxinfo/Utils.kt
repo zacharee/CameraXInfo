@@ -6,7 +6,6 @@ import android.content.Intent
 import android.hardware.camera2.CameraCharacteristics
 import android.icu.text.DecimalFormat
 import android.icu.text.DecimalFormatSymbols
-import android.net.Uri
 import android.util.Size
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
@@ -15,7 +14,6 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.google.ar.core.ArCoreApk
 import kotlinx.coroutines.delay
-import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.atan
 import androidx.core.net.toUri
@@ -65,7 +63,7 @@ fun getFOV(focal: Float, frameSize: SizeF, alwaysShowPeriod: Boolean = false): S
             }
         }
     ).format(
-        2f * atan(frameSize.run { height * 16.0 / 9.0 } / (focal * 2f)) * 180 / PI
+        2f * atan(frameSize.width / (focal * 2f)) * 180 / PI,
     )
 }
 
