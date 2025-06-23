@@ -31,40 +31,42 @@ import dev.zwander.cameraxinfo.data.createTreeFromPaths
 import dev.zwander.cameraxinfo.util.awaitCatchingError
 import dev.zwander.cameraxinfo.util.signInIfNeeded
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
 import kotlin.math.absoluteValue
 
 val LocalDataModel = compositionLocalOf<DataModel> { error("No DataModel set") }
 
 class DataModel {
-    val supportedSdrQualities = mutableStateMapOf<String, List<String>>()
-    val supportedHlgQualities = mutableStateMapOf<String, List<String>>()
-    val supportedHdr10Qualities = mutableStateMapOf<String, List<String>>()
-    val supportedHdr10PlusQualities = mutableStateMapOf<String, List<String>>()
-    val supportedDolbyVision10BitQualities = mutableStateMapOf<String, List<String>>()
-    val supportedDolbyVision8BitQualities = mutableStateMapOf<String, List<String>>()
-    val physicalSensors = mutableStateMapOf<String, Map<String, CameraCharacteristics>>()
-    val extensions = mutableStateMapOf<String, Map<Int, ExtensionAvailability>>()
-    val cameraInfos = mutableStateListOf<CameraInfoHolder>()
-    val imageCaptureCapabilities = mutableStateMapOf<String, List<String>>()
+    val supportedSdrQualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val supportedHlgQualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val supportedHdr10Qualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val supportedHdr10PlusQualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val supportedDolbyVision10BitQualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val supportedDolbyVision8BitQualities = MutableStateFlow<Map<String, List<String>>>(mapOf())
+    val physicalSensors = MutableStateFlow<Map<String, Map<String, CameraCharacteristics>>>(mapOf())
+    val extensions = MutableStateFlow<Map<String, Map<Int, ExtensionAvailability>>>(mapOf())
+    val cameraInfos = MutableStateFlow<List<CameraInfoHolder>>(listOf())
+    val imageCaptureCapabilities = MutableStateFlow<Map<String, List<String>>>(mapOf())
 
-    var arCoreStatus by mutableStateOf<ArCoreApk.Availability?>(null)
-    var depthStatus by mutableStateOf<Boolean?>(null)
+    val arCoreStatus = MutableStateFlow<ArCoreApk.Availability?>(null)
+    val depthStatus = MutableStateFlow<Boolean?>(null)
 
-    var currentPath by mutableStateOf<Node?>(null)
-    var pathLoadError by mutableStateOf<Exception?>(null)
+    val currentPath = MutableStateFlow<Node?>(null)
+    val pathLoadError = MutableStateFlow<Exception?>(null)
 
     private var previousPathPopulateTime = 0L
 
     suspend fun populatePath(context: Context) = coroutineScope {
         val firestore = Firebase.firestore
 
-        currentPath = null
+        currentPath.value = null
 
         val signInResult = signInIfNeeded()
 
         if (signInResult != null) {
-            currentPath = Node(
+            currentPath.value = Node(
                 name = context.resources.getString(R.string.error, signInResult.message)
             )
             return@coroutineScope
@@ -73,10 +75,10 @@ class DataModel {
         val group = firestore.collectionGroup("CameraDataNode")
         val g = group.addSnapshotListener { _, _ -> }
 
-        currentPath = try {
+        currentPath.value = try {
             group.get().awaitCatchingError().createTreeFromPaths()
         } catch (e: Exception) {
-            pathLoadError = e
+            pathLoadError.value = e
             null
         }
         g.remove()
@@ -88,16 +90,16 @@ class DataModel {
 
         val currentTime = System.currentTimeMillis()
 
-        if (currentPath != null && (currentTime - previousPathPopulateTime).absoluteValue > 30_000) {
+        if (currentPath.value != null && (currentTime - previousPathPopulateTime).absoluteValue > 30_000) {
             previousPathPopulateTime = currentTime
             withContext(Dispatchers.IO) {
                 populatePath(context)
             }
         }
 
-        extensions.clear()
-        arCoreStatus = null
-        depthStatus = null
+        extensions.value = mapOf()
+        arCoreStatus.value = null
+        depthStatus.value = null
 
         launch(Dispatchers.IO) {
             val p = ProcessCameraProvider.getInstance(context).await()
@@ -110,6 +112,8 @@ class DataModel {
                 ).also { (info, info2) ->
                     launch(Dispatchers.IO) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            val newPhysicalSensors = mutableMapOf<String, Map<String, CameraCharacteristics>>()
+
                             try {
                                 val logicalChars =
                                     cameraManager.getCameraCharacteristics(info2.cameraId)
@@ -117,16 +121,20 @@ class DataModel {
                                     id to cameraManager.getCameraCharacteristics(id)
                                 }
 
-                                physicalSensors[info2.cameraId] = physicals.toMap()
+                                newPhysicalSensors[info2.cameraId] = physicals.toMap()
                             } catch (_: IllegalArgumentException) {
                                 launch(Dispatchers.Main) {
                                     Toast.makeText(context, R.string.unable_to_retrieve_physical_cameras, Toast.LENGTH_SHORT).show()
                                 }
                             }
+
+                            physicalSensors.value = newPhysicalSensors
                         }
                     }
 
                     launch(Dispatchers.IO) {
+                        val newExtensionsMap = mutableMapOf<String, Map<Int, ExtensionAvailability>>()
+
                         val camera2Extensions =
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 cameraManager.getCameraExtensionCharacteristics(info2.cameraId).supportedExtensions
@@ -173,26 +181,55 @@ class DataModel {
                             )
                         }
 
-                        extensions[info2.cameraId] = extensionAvailability.toMap()
+                        newExtensionsMap[info2.cameraId] = extensionAvailability.toMap()
+
+                        extensions.value = newExtensionsMap
                     }
 
                     launch(Dispatchers.IO) {
                         val videoCapabilities = Recorder.getVideoCapabilities(info)
-                        supportedSdrQualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
-                        supportedHlgQualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.HLG_10_BIT).mapQualities(context)
-                        supportedHdr10Qualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.HDR10_10_BIT).mapQualities(context)
-                        supportedHdr10PlusQualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.HDR10_PLUS_10_BIT).mapQualities(context)
-                        supportedDolbyVision10BitQualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
-                        supportedDolbyVision8BitQualities[info2.cameraId] =
-                            videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
+
+                        supportedSdrQualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.SDR).mapQualities(context)
+                            }
+                        }
+                        supportedHlgQualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.HLG_10_BIT).mapQualities(context)
+                            }
+                        }
+                        supportedHdr10Qualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.HDR10_10_BIT).mapQualities(context)
+                            }
+                        }
+                        supportedHdr10PlusQualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.HDR10_PLUS_10_BIT).mapQualities(context)
+                            }
+                        }
+                        supportedDolbyVision10BitQualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_10_BIT).mapQualities(context)
+                            }
+                        }
+                        supportedDolbyVision8BitQualities.update { q ->
+                            q.toMutableMap().apply {
+                                this[info2.cameraId] =
+                                    videoCapabilities.getSupportedQualities(DynamicRange.DOLBY_VISION_8_BIT).mapQualities(context)
+                            }
+                        }
                     }
 
                     launch(Dispatchers.IO) {
+                        val newCapabilitiesMap = mutableMapOf<String, List<String>>()
+
                         val imageCaptureCapabilities = ImageCapture.getImageCaptureCapabilities(info)
                         val captureProcessProgress = imageCaptureCapabilities.isCaptureProcessProgressSupported
                         val postView = imageCaptureCapabilities.isPostviewSupported
@@ -223,15 +260,16 @@ class DataModel {
                             )
                         })
 
-                        this@DataModel.imageCaptureCapabilities[info2.cameraId] = capabilitiesList
+                        newCapabilitiesMap[info2.cameraId] = capabilitiesList
+
+                        this@DataModel.imageCaptureCapabilities.value = newCapabilitiesMap
                     }
                 }
             }.sortedBy { (_, info2) ->
                 info2.getCameraCharacteristic(CameraCharacteristics.LENS_FACING)?.times(-1)
             }
 
-            cameraInfos.clear()
-            cameraInfos.addAll(newList)
+            cameraInfos.value = newList
         }
 
         launch(Dispatchers.IO) {
@@ -252,7 +290,7 @@ class DataModel {
                 }
             }
 
-            depthStatus = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
+            depthStatus.value = if (status == ArCoreApk.Availability.SUPPORTED_INSTALLED) {
                 try {
                     val session = Session(context)
                     session.isDepthModeSupported(Config.DepthMode.AUTOMATIC).also {
@@ -266,7 +304,7 @@ class DataModel {
                 null
             }
 
-            arCoreStatus = try {
+            arCoreStatus.value = try {
                 Session(context).close()
                 status
             } catch (e: Throwable) {

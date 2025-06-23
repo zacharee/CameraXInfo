@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.mvvm.flow.compose.collectAsMutableState
 import dev.zwander.cameraxinfo.model.DataModel
 import dev.zwander.cameraxinfo.model.LocalDataModel
 import dev.zwander.cameraxinfo.ui.components.*
@@ -79,6 +80,9 @@ fun MainContent() {
             mutableStateOf(false)
         }
 
+        var pathLoadError by model.pathLoadError.collectAsMutableState()
+        val cameraInfos by model.cameraInfos.collectAsState()
+
         LaunchedEffect(key1 = lastRefresh) {
             isRefreshing = true
 
@@ -129,7 +133,7 @@ fun MainContent() {
                             }
                         }
 
-                        model.cameraInfos.forEach { (_, info2) ->
+                        cameraInfos.forEach { (_, info2) ->
                             item(key = info2.cameraId) {
                                 AnimateInBox(
                                     modifier = Modifier.animateItem()
@@ -144,12 +148,12 @@ fun MainContent() {
                 }
             }
 
-            if (model.pathLoadError != null) {
+            if (pathLoadError != null) {
                 CustomDialog(
-                    onDismissRequest = { model.pathLoadError = null },
+                    onDismissRequest = { pathLoadError = null },
                     title = stringResource(id = R.string.error_no_format),
                     content = {
-                        Text(text = stringResource(id = R.string.error_browsing, model.pathLoadError?.localizedMessage ?: ""))
+                        Text(text = stringResource(id = R.string.error_browsing, pathLoadError?.localizedMessage ?: ""))
                     }
                 )
             }

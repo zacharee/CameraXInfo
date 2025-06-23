@@ -82,4 +82,6 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.storage.ktx)
     implementation(libs.firebase.firestore.ktx)
+
+    implementation(libs.mvvm.flow.compose)
 }

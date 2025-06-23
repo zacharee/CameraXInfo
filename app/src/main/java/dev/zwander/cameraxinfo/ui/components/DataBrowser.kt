@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.mvvm.flow.compose.collectAsMutableState
 import dev.zwander.cameraxinfo.R
 import dev.zwander.cameraxinfo.data.Node
 import dev.zwander.cameraxinfo.model.LocalDataModel
@@ -34,11 +35,12 @@ enum class SortMode {
 @Composable
 fun DataBrowser(
     onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val model = LocalDataModel.current
     val context = LocalContext.current
     val listState = rememberLazyListState()
+    var currentPath by model.currentPath.collectAsMutableState()
 
     var sortMode by rememberSaveable {
         mutableStateOf(SortMode.NAME)
@@ -49,7 +51,7 @@ fun DataBrowser(
     }
 
     LaunchedEffect(key1 = null) {
-        if (model.currentPath == null) {
+        if (currentPath == null) {
             withContext(Dispatchers.IO) {
                 model.populatePath(context)
             }
@@ -67,10 +69,10 @@ fun DataBrowser(
         ) {
             IconButton(
                 onClick = {
-                    model.currentPath?.parent?.apply {
+                    currentPath?.parent?.apply {
                         when {
                             this() == null -> onDismissRequest()
-                            else -> model.currentPath = this()
+                            else -> currentPath = this()
                         }
                     }
                 }
@@ -81,7 +83,7 @@ fun DataBrowser(
                 )
             }
 
-            AnimatedVisibility(visible = model.currentPath?.run { this.content == null && this.children.none { it.content != null } } == true) {
+            AnimatedVisibility(visible = currentPath?.run { this.content == null && this.children.none { it.content != null } } == true) {
                 IconButton(
                     onClick = {
                         sortMode = if (sortMode == SortMode.NAME) SortMode.COUNT else SortMode.NAME
@@ -111,7 +113,7 @@ fun DataBrowser(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = model.currentPath?.absolutePath ?: stringResource(id = R.string.loading)
+                    text = currentPath?.absolutePath ?: stringResource(id = R.string.loading)
                 )
             }
         }
@@ -122,7 +124,7 @@ fun DataBrowser(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             state = listState
         ) {
-            if (model.currentPath == null) {
+            if (currentPath == null) {
                 item(key = "LoadingIndicator") {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -133,15 +135,15 @@ fun DataBrowser(
                 }
             }
 
-            if (model.currentPath?.content == null) {
-                items(items = model.currentPath?.children?.run {
+            if (currentPath?.content == null) {
+                items(items = currentPath?.children?.run {
                     when (sortMode) {
                         SortMode.NAME -> sortedBy { it.name }
                         SortMode.COUNT -> sortedBy { -it.children.size }
                     }
                 } ?: listOf(), key = { it.absolutePath }) {
                     it.StorageListItem(Modifier.animateItem()) {
-                        model.currentPath = it
+                        currentPath = it
                     }
                 }
             } else {
@@ -153,7 +155,7 @@ fun DataBrowser(
                     ) {
                         SelectionContainer {
                             Text(
-                                text = model.currentPath?.content ?: ""
+                                text = currentPath?.content ?: ""
                             )
                         }
                     }
@@ -176,7 +178,7 @@ private fun Node.StorageListItem(modifier: Modifier = Modifier, onClick: () -> U
                 .heightIn(min = 48.dp)
                 .padding(8.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = name

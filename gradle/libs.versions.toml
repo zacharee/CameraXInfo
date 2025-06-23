@@ -15,6 +15,7 @@ kotlinxCoroutinesGuava = "1.10.2"
 kotlinxCoroutinesPlayServices = "1.10.2"
 lifecycleRuntimeKtx = "2.9.1"
 material = "1.12.0"
+mvvmCompose = "0.16.1"
 patreonsupportersretrieval = "8436bbdbdc"
 preferenceKtx = "1.2.1"
 zip4j = "2.11.5"
@@ -45,6 +46,7 @@ kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+mvvm-flow-compose = { module = "dev.icerock.moko:mvvm-flow-compose", version.ref = "mvvmCompose" }
 patreonsupportersretrieval = { module = "com.github.zacharee:PatreonSupportersRetrieval", version.ref = "patreonsupportersretrieval" }
 preference-ktx = { module = "androidx.preference:preference-ktx", version.ref = "preferenceKtx" }
 zip4j = { module = "net.lingala.zip4j:zip4j", version.ref = "zip4j" }

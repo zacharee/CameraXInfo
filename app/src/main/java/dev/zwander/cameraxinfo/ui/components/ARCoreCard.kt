@@ -24,6 +24,9 @@ private const val COLUMN_WEIGHT = 0.5f
 fun ARCoreCard(modifier: Modifier = Modifier) {
     val model = LocalDataModel.current
 
+    val arCoreStatus by model.arCoreStatus.collectAsState()
+    val depthStatus by model.depthStatus.collectAsState()
+
     PaddedColumnCard(
         modifier = modifier.animateContentSize()
     ) {
@@ -94,8 +97,8 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
 
                     SupportStateIcon(
                         state = when {
-                            model.arCoreStatus?.isSupported == true -> true
-                            model.arCoreStatus == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE -> false
+                            arCoreStatus?.isSupported == true -> true
+                            arCoreStatus == ArCoreApk.Availability.UNSUPPORTED_DEVICE_NOT_CAPABLE -> false
                             else -> null
                         },
                         modifier = Modifier.weight(COLUMN_WEIGHT)
@@ -104,7 +107,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                     Spacer(Modifier.width(8.dp))
 
                     SupportStateIcon(
-                        state = model.depthStatus,
+                        state = depthStatus,
                         modifier = Modifier.weight(COLUMN_WEIGHT)
                     )
                 }
@@ -121,7 +124,7 @@ fun ARCoreCard(modifier: Modifier = Modifier) {
                     )
 
                     SupportStateIcon(
-                        state = when (model.arCoreStatus) {
+                        state = when (arCoreStatus) {
                             ArCoreApk.Availability.SUPPORTED_INSTALLED -> SupportState.SUPPORTED
                             ArCoreApk.Availability.SUPPORTED_APK_TOO_OLD -> SupportState.OUTDATED
                             ArCoreApk.Availability.SUPPORTED_NOT_INSTALLED -> SupportState.UNSUPPORTED

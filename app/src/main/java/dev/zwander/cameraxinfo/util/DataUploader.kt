@@ -162,12 +162,12 @@ fun DataModel.buildInfo(context: Context): String {
     infoObject.put(
         "arcore",
         JSONObject().apply {
-            put("arcore_support", arCoreStatus)
-            put("depth_support", depthStatus)
+            put("arcore_support", arCoreStatus.value)
+            put("depth_support", depthStatus.value)
         }
     )
 
-    cameraInfos.forEach { (info, info2) ->
+    cameraInfos.value.forEach { (info, info2) ->
         infoObject.put(
             info2.cameraId,
             JSONObject().apply {
@@ -175,7 +175,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "physical_sensors",
                     JSONArray().apply {
-                        physicalSensors[info2.cameraId]?.forEach { (_, u) ->
+                        physicalSensors.value[info2.cameraId]?.forEach { (_, u) ->
                             put(JSONObject().apply { insertCameraInfo(u, context) })
                         }
                     },
@@ -183,7 +183,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "video_qualities",
                     JSONArray().apply {
-                        supportedSdrQualities[info2.cameraId]?.forEach { q ->
+                        supportedSdrQualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -191,7 +191,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "hlg_video_qualities",
                     JSONArray().apply {
-                        supportedHlgQualities[info2.cameraId]?.forEach { q ->
+                        supportedHlgQualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -199,7 +199,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "hdr_10_video_qualities",
                     JSONArray().apply {
-                        supportedHdr10Qualities[info2.cameraId]?.forEach { q ->
+                        supportedHdr10Qualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -207,7 +207,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "hdr_10_plus_video_qualities",
                     JSONArray().apply {
-                        supportedHdr10PlusQualities[info2.cameraId]?.forEach { q ->
+                        supportedHdr10PlusQualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -215,7 +215,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "dolby_vision_10_bit_video_qualities",
                     JSONArray().apply {
-                        supportedDolbyVision10BitQualities[info2.cameraId]?.forEach { q ->
+                        supportedDolbyVision10BitQualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -223,7 +223,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "dolby_vision_8_bit_video_qualities",
                     JSONArray().apply {
-                        supportedDolbyVision8BitQualities[info2.cameraId]?.forEach { q ->
+                        supportedDolbyVision8BitQualities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -231,7 +231,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "image_capture_capabilities",
                     JSONArray().apply {
-                        imageCaptureCapabilities[info2.cameraId]?.forEach { q ->
+                        imageCaptureCapabilities.value[info2.cameraId]?.forEach { q ->
                             put(q)
                         }
                     },
@@ -239,7 +239,7 @@ fun DataModel.buildInfo(context: Context): String {
                 put(
                     "extensions",
                     JSONObject().apply {
-                        (extensions[info2.cameraId] ?: defaultExtensionState).forEach { (t, u) ->
+                        (extensions.value[info2.cameraId] ?: defaultExtensionState).forEach { (t, u) ->
                             put(
                                 t.extensionModeToString(context, false),
                                 JSONObject().apply {

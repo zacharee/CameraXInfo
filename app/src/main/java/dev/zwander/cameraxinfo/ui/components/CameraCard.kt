@@ -8,7 +8,6 @@ import androidx.camera.extensions.ExtensionMode
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -39,7 +38,10 @@ val defaultExtensionState = mapOf(
 @Composable
 fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
     val model = LocalDataModel.current
-    val isLogical = model.physicalSensors[which2.cameraId]?.isNotEmpty() == true
+    val physicalSensors by model.physicalSensors.collectAsState()
+    val isLogical = physicalSensors[which2.cameraId]?.isNotEmpty() == true
+
+    val extensions by model.extensions.collectAsState()
 
     PaddedColumnCard(
         modifier = modifier
@@ -94,12 +96,12 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
         )
 
         mapOf(
-            R.string.video_quality_sdr to model.supportedSdrQualities[which2.cameraId],
-            R.string.video_quality_hlg to model.supportedHlgQualities[which2.cameraId],
-            R.string.video_quality_hdr_10 to model.supportedHdr10Qualities[which2.cameraId],
-            R.string.video_quality_hdr_10_plus to model.supportedHdr10PlusQualities[which2.cameraId],
-            R.string.video_quality_dolby_vision_10_bit to model.supportedDolbyVision10BitQualities[which2.cameraId],
-            R.string.video_quality_dolby_vision_8_bit to model.supportedDolbyVision8BitQualities[which2.cameraId],
+            R.string.video_quality_sdr to model.supportedSdrQualities.collectAsState().value[which2.cameraId],
+            R.string.video_quality_hlg to model.supportedHlgQualities.collectAsState().value[which2.cameraId],
+            R.string.video_quality_hdr_10 to model.supportedHdr10Qualities.collectAsState().value[which2.cameraId],
+            R.string.video_quality_hdr_10_plus to model.supportedHdr10PlusQualities.collectAsState().value[which2.cameraId],
+            R.string.video_quality_dolby_vision_10_bit to model.supportedDolbyVision10BitQualities.collectAsState().value[which2.cameraId],
+            R.string.video_quality_dolby_vision_8_bit to model.supportedDolbyVision8BitQualities.collectAsState().value[which2.cameraId],
         ).forEach { (dynamicRange, supportedQualities) ->
             AnimatedVisibility(visible = supportedQualities?.isNotEmpty() == true) {
                 Column {
@@ -113,7 +115,7 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
             }
         }
 
-        val imageCaptureCapabilities = model.imageCaptureCapabilities[which2.cameraId]
+        val imageCaptureCapabilities = model.imageCaptureCapabilities.collectAsState().value[which2.cameraId]
 
         AnimatedVisibility(visible = !imageCaptureCapabilities.isNullOrEmpty()) {
             Column {
@@ -126,7 +128,7 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
             }
         }
 
-        val physicalSensors = model.physicalSensors[which2.cameraId]
+        val physicalSensors = physicalSensors[which2.cameraId]
 
         AnimatedVisibility(visible = physicalSensors?.isNotEmpty() == true) {
             Column(
@@ -172,6 +174,6 @@ fun CameraCard(which2: Camera2CameraInfo, modifier: Modifier = Modifier) {
             }
         )
 
-        ExtensionsCard(extensionAvailability = model.extensions[which2.cameraId] ?: defaultExtensionState)
+        ExtensionsCard(extensionAvailability = extensions[which2.cameraId] ?: defaultExtensionState)
     }
 }
