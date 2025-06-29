@@ -44,8 +44,10 @@ fun CameraXInfoTheme(
             (view.context as Activity).window.apply {
                 @Suppress("DEPRECATION")
                 statusBarColor = colorScheme.primary.toArgb()
-                @Suppress("DEPRECATION")
-                isStatusBarContrastEnforced = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    @Suppress("DEPRECATION")
+                    isStatusBarContrastEnforced = false
+                }
                 WindowCompat.getInsetsController(this, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
