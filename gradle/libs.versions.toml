@@ -41,8 +41,8 @@ constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayou
 core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore-ktx" }
-firebase-storage-ktx = { module = "com.google.firebase:firebase-storage-ktx" }
+firebase-firestore-ktx = { module = "com.google.firebase:firebase-firestore" }
+firebase-storage-ktx = { module = "com.google.firebase:firebase-storage" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinxCoroutinesGuava" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }

@@ -9,12 +9,12 @@ import android.os.Parcelable
 import android.util.SizeF
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.core.CameraInfo
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
 import dev.zwander.cameraxinfo.BuildConfig
 import dev.zwander.cameraxinfo.extensionModeToString
 import dev.zwander.cameraxinfo.getFOV

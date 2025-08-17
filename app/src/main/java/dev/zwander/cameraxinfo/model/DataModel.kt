@@ -20,8 +20,8 @@ import androidx.compose.runtime.*
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import dev.zwander.cameraxinfo.awaitAvailability
 import dev.zwander.cameraxinfo.data.CameraInfoHolder
 import dev.zwander.cameraxinfo.data.ExtensionAvailability
