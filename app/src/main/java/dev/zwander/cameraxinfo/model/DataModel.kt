@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.core.CameraUnavailableException
 import androidx.camera.core.DynamicRange
 import androidx.camera.core.ImageCapture
 import androidx.camera.extensions.ExtensionMode
@@ -17,6 +18,8 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.Quality
 import androidx.camera.video.Recorder
 import androidx.compose.runtime.*
+import com.bugsnag.android.BreadcrumbType
+import com.bugsnag.android.Bugsnag
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
@@ -102,7 +105,16 @@ class DataModel {
         depthStatus.value = null
 
         launch(Dispatchers.IO) {
-            val p = ProcessCameraProvider.getInstance(context).await()
+            val p = try {
+                ProcessCameraProvider.getInstance(context).await()
+            } catch (e: CameraUnavailableException) {
+                Bugsnag.leaveBreadcrumb(
+                    "Error getting cameras",
+                    mapOf("error" to e),
+                    BreadcrumbType.ERROR,
+                )
+                return@launch
+            }
             val e = ExtensionsManager.getInstanceAsync(context, p).await()
 
             val newList = p.availableCameraInfos.map {
@@ -137,12 +149,20 @@ class DataModel {
                     launch(Dispatchers.IO) {
                         val newExtensionsMap = mutableMapOf<String, Map<Int, ExtensionAvailability>>()
 
-                        val camera2Extensions =
+                        val camera2Extensions = try {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                 cameraManager.getCameraExtensionCharacteristics(info2.cameraId).supportedExtensions
                             } else {
                                 listOf()
                             }
+                        } catch (e: NullPointerException) {
+                            Bugsnag.leaveBreadcrumb(
+                                "Error getting camera extensions",
+                                mapOf("error" to e),
+                                BreadcrumbType.ERROR,
+                            )
+                            listOf()
+                        }
 
                         val extensionAvailability = arrayOf(
                             ExtensionMode.AUTO to CameraExtensionCharacteristics.EXTENSION_AUTOMATIC,
