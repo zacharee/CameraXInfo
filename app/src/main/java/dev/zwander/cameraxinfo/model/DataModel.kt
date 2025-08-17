@@ -108,7 +108,7 @@ class DataModel {
             val newList = p.availableCameraInfos.map {
                 CameraInfoHolder(
                     cameraInfo = it,
-                    camera2Info = Camera2CameraInfo.from(it)
+                    camera2Info = Camera2CameraInfo.from(it),
                 ).also { (info, info2) ->
                     launch(Dispatchers.IO) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
